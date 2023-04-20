@@ -3,6 +3,7 @@
 - Install python things with pip install -r requirements.txt
 - Build docker image with `cd environment && ./run.sh`
 - Takes roughly 10 to 20 mins
+- NOTE: DO NOT PUSH ON THE MAIN BRANCH FOR NOW
 
 # Entelect Challenge 2023 - CyFi
 
