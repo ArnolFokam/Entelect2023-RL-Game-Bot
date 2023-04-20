@@ -1,8 +1,9 @@
 # From Manuel
 - Create python environment
 - Install python things with pip install -r requirements.txt
-- Build docker image with `cd environment && ./run.sh`
+- Build docker image and run environment with `cd environment && ./run.sh`
 - Takes roughly 10 to 20 mins
+- While env is running, run `python -m ecbot.main`
 
 # Entelect Challenge 2023 - CyFi
 
