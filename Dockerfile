@@ -9,4 +9,4 @@ RUN pip3 install -r requirements.txt
 
 COPY ./ecbot ./ecbot
 
-ENTRYPOINT python3 -m ecbot.main
+ENTRYPOINT python3 -m ecbot.main 
