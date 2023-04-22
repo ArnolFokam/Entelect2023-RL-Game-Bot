@@ -4,6 +4,7 @@
 - Build docker image and run environment with `cd environment && ./run.sh`
 - Takes roughly 10 to 20 mins
 - While env is running, run `python -m ecbot.main`
+- `conda install -c conda-forge libstdcxx-ng` helps pygame to run
 
 # Entelect Challenge 2023 - CyFi
 

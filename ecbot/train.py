@@ -1,14 +1,13 @@
-from .environment import CyFiEnv
+from .envs.single_player_single_agent import SinglePlayerSingleAgentEnv
 
 if __name__ == "__main__":
-    env = CyFiEnv()
+    # there is only one player and one 
+    # learnig agent in this environment
+    env = SinglePlayerSingleAgentEnv(render_mode="human")
     observation = env.reset()
     done = False
-    t = 0
     
     while not done:
         action = env.action_space.sample()  # choose random action
         observation, reward, done, info = env.step(action)  # feedback from environment
-        t += 1
-        if not t % 100:
-            print(t, info)
+        env.render(observation)  # render the environment

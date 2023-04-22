@@ -2,21 +2,40 @@ import os
 import uuid
 import time
 import numpy as np
-from dataclasses import dataclass
-from typing import Any,  List, Optional
+from dataclasses import dataclass, field
+from typing import Any, Dict,  List, Optional
 
 
 from signalrcore.helpers import logging as LogLevel
 from signalrcore.hub_connection_builder import HubConnectionBuilder
 
+
+class Constants:
+    CURRENT_LEVEL="currentLevel"
+    CONNECTION_ID="connectionId"
+    COLLECTED="collected"
+    ELAPSED_TIME="elapsedTime"
+    HERO_WINDOW="heroWindow"
+    POSITION_X="x"
+    POSITION_Y="y"
+
 @dataclass
 class State:
     connected: bool = False
-    bot_id: Optional[str] = None
-    bot_window: Optional[np.ndarray] = None
+    
+    # id of the bot in the game
+    bot_id: Optional[List[str]]= None
+    
+    # state of the bot
+    bot_state: List[Dict[str, Any]] = field(default_factory=list) 
+    
+    # game is completed
+    completed: bool = False
 
-class CiFyServer:
-    def __init__(self) -> None:
+class CiFyClient:
+    
+    
+    def __init__(self, max_frames: Optional[int] = 10) -> None:
         # Configuration
         runner_ip = os.getenv("RUNNER_IPV4") or "localhost"
         runner_ip = runner_ip if runner_ip.startswith("http://") else f"http://{runner_ip}"
@@ -60,46 +79,47 @@ class CiFyServer:
             
         # When the ReceiveBotState commmand is sent from the runner.
         def on_receive_bot_state(params: List[Any]):
-            self.state.bot_window = tuple([block for row in params[0]["heroWindow"] for block in row])
-            
-            # TODO: complete state of the connection
-            # current and previous item collected
-            # was an item stolen
+            if len(self.state.bot_state) >= max_frames:
+                self.state.bot_state.pop(0)
+            self.state.bot_state.append(params[0])
+        
+        # When the GameCompleted command is sent from the runner.
+        def on_game_completed():
+            self.state.completed = True
+            print("Game completed")
+                
 
         self.connection.on_open(on_open)
         self.connection.on_close(on_close)
         self.connection.on("Disconnect", on_disconnect)
         self.connection.on("Registered", on_registered)
         self.connection.on("ReceiveBotState", on_receive_bot_state)
+        self.connection.on("GameCompleted", on_game_completed)
         
     def send_player_command(self, action: int):
         self.connection.send("SendPlayerCommand", [{
             "Action" : action,                                   
             "BotId" : self.state.bot_id,
         }])
-        time.sleep(0.2)
-        
-        # TODO: Implement reward function.
-        # - Item collected: +1
-        # - Item dropped: -1
-        # - Item stolen: +1
-        reward = 1
-        return reward
+        time.sleep(0.1)
         
         
     def connect(self):
+        # initiate connection with the game server
         print("Starting connection...")
         self.connection.start()
-        time.sleep(0.2)
+        time.sleep(0.1)
+        
+        # register new bot
         print("Registering bot")
         bot_nickname = os.getenv("BOT_NICKNAME") or f"AAIIGBot-{uuid.uuid1()}"
         self.connection.send("Register", [bot_nickname])
-        time.sleep(0.2)
+        time.sleep(0.1)
         
     def disconnect(self):
         print("Disconnecting bot...")
         self.connection.stop()
-        time.sleep(0.2)
+        time.sleep(0.1)
         
     def reconnect(self):
         self.disconnect()
