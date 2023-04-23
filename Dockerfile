@@ -1,4 +1,4 @@
-FROM public.ecr.aws/m5z5a5b2/languages/python:2021
+FROM public.ecr.aws/lambda/python:3.11-preview
 
 ARG SOURCE_DIRECTORY
 
@@ -9,4 +9,4 @@ RUN pip3 install -r requirements.txt
 
 COPY ./ecbot ./ecbot
 
-ENTRYPOINT python3 -m ecbot.main 
+ENTRYPOINT python3 -m ecbot.train 
