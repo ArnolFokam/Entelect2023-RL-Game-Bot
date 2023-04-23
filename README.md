@@ -1,9 +1,19 @@
+# Requires
+- Python 3.11.3
+- Docker
+- Conda (Anaconda or Miniconda)
+
 # How to run
-- Create python environment
-- Install python things with pip install -r requirements.txt
+
+## Environment
 - Build docker image and run environment with `cd game && ./run.sh`
 - Takes roughly 10 to 20 mins
-- While env is running, run `python -m ecbot.train`
+
+## Agent
+- Create python environment with `conda create -n ecbot python=3.11.3`
+- Activate the environment with `conda activate ecbot`
+- Install python things with pip install -r requirements.txt
+- While env is running, run `python -m ecbot.train` on another terminal tab
 - `conda install -c conda-forge libstdcxx-ng` if pygame crashes on some iris, swarst issues
 
 
