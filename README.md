@@ -33,3 +33,4 @@
 
 - [ ] Build the inference class that plays the game using a trained agent **(features)**
 - [ ] Add support for distributed training to train agents in parallel **(features)**
+- [ ] Check bugs on server and submit it to [entellect repo](https://github.com/EntelectChallenge/2023-Cy-Fi) **(features)**
