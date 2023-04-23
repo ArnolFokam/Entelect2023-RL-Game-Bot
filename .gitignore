@@ -568,3 +568,6 @@ FodyWeavers.xsd
 *.pyc
 __pycache__/
 .venv/
+
+# user added ignores
+.vscode/
