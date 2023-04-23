@@ -45,8 +45,8 @@ class SinglePlayerSingleAgentEnv(Env):
         # STEAL - 12 (WIP wrench)
         self.action_space = spaces.Discrete(12, start=1)
         
-        # Our CiFy agent can only observe a window 
-        # of height of 33 and a weight of 20 arount it
+        # Our CiFy agent only knows about its windowed view, 
+        # the collected items and the current level
         # Note: the agent is at the center of the window
         self.observation_space = {
             "window": spaces.Box(low=0, high=6, shape=(33, 20), dtype=int),
