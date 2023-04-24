@@ -50,8 +50,8 @@ class SinglePlayerSingleAgentEnv(Env):
         # Note: the agent is at the center of the window
         self.observation_space = {
             "window": spaces.Box(low=0, high=6, shape=(33, 20), dtype=int),
-            "collected": spaces.Box(low=0, high=float("inf"), dtype=int),
-            "level": spaces.Box(low=0, high=3, dtype=int)
+            # "collected": spaces.Box(low=0, high=float("inf"), dtype=int),
+            # "level": spaces.Box(low=0, high=3, dtype=int)
         }
         
         assert render_mode is None or render_mode in self.metadata["render_modes"]
@@ -187,8 +187,8 @@ class SinglePlayerSingleAgentEnv(Env):
     def _get_observation(self, game_state):
         return {
             "window": game_state[Constants.HERO_WINDOW],
-            "collected": game_state[Constants.COLLECTED],
-            "level": game_state[Constants.CURRENT_LEVEL],
+            # "collected": game_state[Constants.COLLECTED],
+            # "level": game_state[Constants.CURRENT_LEVEL],
         }
         
     def _get_info(self, game_state):

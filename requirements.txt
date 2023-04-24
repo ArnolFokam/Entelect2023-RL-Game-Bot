@@ -7,4 +7,4 @@ signalrcore==0.9.5
 urllib3==1.26.15
 websocket-client==1.0.0
 gym==0.26.2
-pygame==2.3.0
+stable-baselines==2.10.2

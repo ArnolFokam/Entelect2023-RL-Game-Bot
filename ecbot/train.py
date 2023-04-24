@@ -1,3 +1,6 @@
+# from stable_baselines.deepq.policies import MlpPolicy
+# from stable_baselines import DQN
+
 from .envs.single_player_single_agent import SinglePlayerSingleAgentEnv
 
 if __name__ == "__main__":
@@ -5,6 +8,9 @@ if __name__ == "__main__":
     # learnig agent in this environment
     env = SinglePlayerSingleAgentEnv(render_mode="human")
     episodes = 10
+    
+    # model = DQN(MlpPolicy, env, verbose=1)
+    # model.learn(total_timesteps=25000)
     
     for i in range(episodes):
         
