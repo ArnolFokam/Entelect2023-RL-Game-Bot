@@ -37,4 +37,4 @@
 - [ ] Add support for distributed training to train agents in parallel **(features)**
 - [ ] Check bugs on server and submit it to [entellect repo](https://github.com/EntelectChallenge/2023-Cy-Fi) **(features)**
 
-- [ ] Self-play **(features)**
+- [ ] Add self-play mechanism **(features)**
