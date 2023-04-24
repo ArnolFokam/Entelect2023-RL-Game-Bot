@@ -1,12 +1,11 @@
 import numpy as np
 
-from gym import Env
-from gym import spaces
 import pygame
+import gymnasium as gym
 
 from ecbot.connection import CiFyClient, Constants
 
-class SinglePlayerSingleAgentEnv(Env):
+class SinglePlayerSingleAgentEnv(gym.Env):
     metadata = {
         "render_modes": ["human", "rgb_array"], 
         "render_fps": 60,
@@ -43,16 +42,16 @@ class SinglePlayerSingleAgentEnv(Env):
         # DIGLEFT - 10
         # DIGRIGHT - 11
         # STEAL - 12 (WIP wrench)
-        self.action_space = spaces.Discrete(12, start=1)
+        self.action_space = gym.spaces.Discrete(12, start=1)
         
         # Our CiFy agent only knows about its windowed view, 
         # the collected items and the current level
         # Note: the agent is at the center of the window
-        self.observation_space = {
-            "window": spaces.Box(low=0, high=6, shape=(33, 20), dtype=int),
-            # "collected": spaces.Box(low=0, high=float("inf"), dtype=int),
-            # "level": spaces.Box(low=0, high=3, dtype=int)
-        }
+        self.observation_space = gym.spaces.Dict({
+            "window": gym.spaces.Box(low=0, high=6, shape=(33, 20), dtype=int),
+            "collected": gym.spaces.Box(low=0, high=float("inf"), dtype=int),
+            "level": gym.spaces.Box(low=0, high=3, dtype=int)
+        })
         
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
@@ -67,7 +66,7 @@ class SinglePlayerSingleAgentEnv(Env):
         self.current_level = 0
     
     def step(self, action: int):
-        self.game_client.send_player_command(action)
+        self.game_client.send_player_command(int(action))
         
         self._wait_for_game_state()
         observation, info, done = self._return_env_state()
