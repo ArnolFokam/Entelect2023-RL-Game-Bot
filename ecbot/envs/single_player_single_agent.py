@@ -187,8 +187,8 @@ class SinglePlayerSingleAgentEnv(Env):
     def _get_observation(self, game_state):
         return {
             "window": game_state[Constants.HERO_WINDOW],
-            # "collected": game_state[Constants.COLLECTED],
-            # "level": game_state[Constants.CURRENT_LEVEL],
+            "collected": game_state[Constants.COLLECTED],
+            "level": game_state[Constants.CURRENT_LEVEL],
         }
         
     def _get_info(self, game_state):
