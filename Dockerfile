@@ -1,4 +1,4 @@
-FROM public.ecr.aws/lambda/python:3.11-preview
+FROM amazon/aws-lambda-python:3.8.2023.04.18.00
 
 ARG SOURCE_DIRECTORY
 
