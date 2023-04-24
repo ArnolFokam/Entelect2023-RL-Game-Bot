@@ -1,5 +1,5 @@
 # Requires
-- Python 3.11.3
+- Python 3.8.16
 - Docker
 - Conda (Anaconda or Miniconda)
 
@@ -10,7 +10,7 @@
 - Takes roughly 10 to 20 mins
 
 ## Agent
-- Create python environment with `conda create -n ecbot python=3.11.3`
+- Create python environment with `conda create -n ecbot python=3.8.16`
 - Activate the environment with `conda activate ecbot`
 - Install python things with pip install -r requirements.txt
 - While env is running, run `python -m ecbot.train` on another terminal tab
