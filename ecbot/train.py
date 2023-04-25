@@ -7,11 +7,11 @@ from .envs.single_player_single_agent import SinglePlayerSingleAgentEnv
 if __name__ == "__main__":
     # there is only one player and one 
     # learnig agent in this environment
-    env = SinglePlayerSingleAgentEnv(render_mode="human")
+    env = SinglePlayerSingleAgentEnv()
     episodes = 10
     
     model = DQN("MlpPolicy", env, verbose=1, buffer_size=200000)
-    model.learn(total_timesteps=1000, progress_bar=True)
+    model.learn(total_timesteps=15000000, progress_bar=True)
     
     # save agent
     model.save("dqn_single_player_single_agent")
