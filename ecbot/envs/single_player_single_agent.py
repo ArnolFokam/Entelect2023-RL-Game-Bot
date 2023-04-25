@@ -1,7 +1,8 @@
 import numpy as np
 
+import gym
 import pygame
-import gymnasium as gym
+from gym import spaces
 
 from ecbot.connection import CiFyClient, Constants
 
@@ -42,15 +43,15 @@ class SinglePlayerSingleAgentEnv(gym.Env):
         # DIGLEFT - 10
         # DIGRIGHT - 11
         # STEAL - 12 (WIP wrench)
-        self.action_space = gym.spaces.Discrete(12, start=1)
+        self.action_space = gym.spaces.Discrete(12)
         
         # Our CiFy agent only knows about its windowed view, 
         # the collected items and the current level
         # Note: the agent is at the center of the window
-        self.observation_space = gym.spaces.Dict({
-            "window": gym.spaces.Box(low=0, high=6, shape=(33, 20), dtype=int),
-            "collected": gym.spaces.Box(low=0, high=float("inf"), dtype=int),
-            "level": gym.spaces.Box(low=0, high=3, dtype=int)
+        self.observation_space = spaces.Dict(spaces={
+            "window": spaces.Box(low=0, high=6, shape=(33, 20), dtype=int),
+            "collected": spaces.Box(low=0, high=float("inf"), shape=(), dtype=int),
+            "level": spaces.Box(low=0, high=3, shape=(), dtype=int)
         })
         
         assert render_mode is None or render_mode in self.metadata["render_modes"]
@@ -66,7 +67,8 @@ class SinglePlayerSingleAgentEnv(gym.Env):
         self.current_level = 0
     
     def step(self, action: int):
-        self.game_client.send_player_command(int(action))
+        # command from the  game server are 1-indexed
+        self.game_client.send_player_command(int(action + 1))
         
         self._wait_for_game_state()
         observation, info, done = self._return_env_state()
@@ -160,12 +162,12 @@ class SinglePlayerSingleAgentEnv(gym.Env):
         self.game_client.reconnect()
         
         self._wait_for_game_state()
-        observation, info, _ = self._return_env_state()
+        observation, _, _ = self._return_env_state()
         
         if self.render_mode == "human":
             self.render(observation)
         
-        return observation, info
+        return observation
     
     def close(self):
         self.game_client.disconnect()
