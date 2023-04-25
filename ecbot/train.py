@@ -16,29 +16,31 @@ if __name__ == "__main__":
     # save agent
     model.save("dqn_single_player_single_agent")
     
-    all_episode_rewards = []
+    # only relavent when we need to visualise the agent
     
-    for i in range(episodes):
+    # all_episode_rewards = []
+    
+    # for i in range(episodes):
         
-        episode_reward = []
+    #     episode_reward = []
         
-        print("Episode {} started".format(i))
+    #     print("Episode {} started".format(i))
         
-        done = False
-        observation = env.reset()
+    #     done = False
+    #     observation = env.reset()
         
-        while not done:
-            action, _ = model.predict(observation, deterministic=False)
-            # print("Action:", action)
-            # action = env.action_space.sample()  # choose random action
-            observation, reward, done, info = env.step(action)  # feedback from environment
-            episode_reward.append(reward) # save reward for this step
-            env.render(info) # render environment
+    #     while not done:
+    #         action, _ = model.predict(observation, deterministic=False)
+    #         # print("Action:", action)
+    #         # action = env.action_space.sample()  # choose random action
+    #         observation, reward, done, info = env.step(action)  # feedback from environment
+    #         episode_reward.append(reward) # save reward for this step
+    #         env.render(info) # render environment
             
-        all_episode_rewards.append(sum(episode_reward))
+    #     all_episode_rewards.append(sum(episode_reward))
         
-        mean_episode_reward = np.mean(all_episode_rewards)
-        print("Episode {} finished".format(i))
-        print("Mean reward:", mean_episode_reward, "Num episodes:", episodes)
+    #     mean_episode_reward = np.mean(all_episode_rewards)
+    #     print("Episode {} finished".format(i))
+    #     print("Mean reward:", mean_episode_reward, "Num episodes:", episodes)
         
         
