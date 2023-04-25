@@ -5,7 +5,7 @@ from ecbot.envs.single_player_single_agent import SinglePlayerSingleAgentEnv
 
 if __name__ == "__main__":
     # Use a separate environement for evaluation
-    eval_env = SinglePlayerSingleAgentEnv(render_mode="human")
+    eval_env = SinglePlayerSingleAgentEnv()
     
     # Load the trained agent
     model = DQN.load("dqn_single_player_single_agent")
@@ -15,6 +15,7 @@ if __name__ == "__main__":
         model, 
         eval_env,
         render=True,
+        deterministic=False,
         n_eval_episodes=100
     )
 

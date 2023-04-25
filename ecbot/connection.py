@@ -104,7 +104,7 @@ class CiFyClient:
             "Action" : action,                                   
             "BotId" : self.state.bot_id,
         }])
-        time.sleep(0.1)
+        time.sleep(0.6)
         
     def register_new_player(self):
         # register new bot

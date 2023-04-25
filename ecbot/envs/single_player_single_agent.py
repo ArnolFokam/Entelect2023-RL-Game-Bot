@@ -27,7 +27,7 @@ class SinglePlayerSingleAgentEnv(gym.Env):
         7: (255, 255, 0), # hero bot => yellow
     }
     
-    def __init__(self, render_mode=None):
+    def __init__(self):
         self.game_client = CiFyClient()
         
         # Our CiFy agent has 12 possible actions
@@ -49,9 +49,6 @@ class SinglePlayerSingleAgentEnv(gym.Env):
         # Note: the agent is at the center of the window
         self.observation_space = spaces.Box(low=0, high=6, shape=(33 * 20,), dtype=int)
         
-        assert render_mode is None or render_mode in self.metadata["render_modes"]
-        self.render_mode = render_mode
-        
         # window and clock rate for 
         # the defined rendering modes
         self.window = None
@@ -66,17 +63,18 @@ class SinglePlayerSingleAgentEnv(gym.Env):
         self.game_client.send_player_command(int(action + 1))
         
         self._wait_for_game_state()
-        observation, info, done = self._return_env_state()
+        self.observation, self.info, done = self._return_env_state()
         reward = self._calculate_reward(done)
-        return observation, reward, done, info
+        return self.observation, reward, done, self.info
     
     def _calculate_reward(self, done):
         return -0.01 if not done else 1
     
-    def render(self, info):
+    def render(self, mode=None):
+        assert mode is None or mode in self.metadata["render_modes"]
         frame = np.zeros((self.window_height, self.window_width, 3), dtype=np.uint8)
         
-        if self.render_mode == "human":
+        if mode == "human":
             
             # initialise pygame if not already initialised
             if self.window is None:
@@ -102,9 +100,9 @@ class SinglePlayerSingleAgentEnv(gym.Env):
         # draw the window and create numpy array    
         for x in range(self.window_width):
             for y in range(self.window_height):
-                frame[y, x] = self.cellToColor[info["window"][y][x]]
+                frame[y, x] = self.cellToColor[self.info["window"][y][x]]
                 
-                if self.render_mode == "human":
+                if mode == "human":
                     pygame.draw.rect(
                         canvas,
                         frame[y, x],
@@ -115,7 +113,7 @@ class SinglePlayerSingleAgentEnv(gym.Env):
                             self.block_size
                         )
                     )
-        if self.render_mode == "human": 
+        if mode == "human": 
             # draw the bot     
             pygame.draw.rect(
                 canvas, 
@@ -138,7 +136,7 @@ class SinglePlayerSingleAgentEnv(gym.Env):
             # The following line will automatically add a delay to keep the framerate stable.
             self.clock.tick(self.metadata["render_fps"])
             
-        if self.render_mode == "rgb_array":
+        if mode == "rgb_array":
             return frame
     
     def reset(self):
@@ -155,12 +153,9 @@ class SinglePlayerSingleAgentEnv(gym.Env):
         # but only when when doing interactive training.
         
         self._wait_for_game_state()
-        observation, info, _ = self._return_env_state()
+        self.observation, self.info, _ = self._return_env_state()
         
-        if self.render_mode == "human":
-            self.render(info)
-        
-        return observation
+        return self.observation
     
     def close(self):
         self.game_client.disconnect()
@@ -175,14 +170,14 @@ class SinglePlayerSingleAgentEnv(gym.Env):
         game_state = self.game_client.state.bot_state.pop(-1)
         
         # get observation and info
-        observation = self._get_observation(game_state)
-        info = self._get_info(game_state)
+        self.observation = self._get_observation(game_state)
+        self.info = self._get_info(game_state)
         completed = self.game_client.state.game_completed
         
-        if self.last_collected > info["collected"] or self.current_level < info["current_level"]:
+        if self.last_collected > self.info["collected"] or self.current_level < self.info["current_level"]:
             completed = True
         
-        return observation, info, completed
+        return self.observation, self.info, completed
         
     
     def _wait_for_game_state(self):
