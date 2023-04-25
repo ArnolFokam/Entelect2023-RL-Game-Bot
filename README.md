@@ -38,3 +38,4 @@
 - [ ] Check bugs on server and submit it to [entellect repo](https://github.com/EntelectChallenge/2023-Cy-Fi) **(features)**
 
 - [ ] Add self-play mechanism **(features)**
+- [ ] Train: Episode = next collectable, reward is timestep from the next collectable.
