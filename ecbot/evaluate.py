@@ -1,4 +1,4 @@
-from stable_baselines3 import DQN
+from stable_baselines3 import PPO
 from stable_baselines3.common.evaluation import evaluate_policy
 
 from ecbot.envs.single_player_single_agent import SinglePlayerSingleAgentEnv
@@ -8,7 +8,7 @@ if __name__ == "__main__":
     eval_env = SinglePlayerSingleAgentEnv()
     
     # Load the trained agent
-    model = DQN.load("dqn_single_player_single_agent")
+    model = PPO.load("dqn_single_player_single_agent")
 
     # Random Agent, before training
     mean_reward, std_reward = evaluate_policy(
