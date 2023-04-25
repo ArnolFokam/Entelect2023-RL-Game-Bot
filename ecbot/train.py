@@ -10,8 +10,8 @@ if __name__ == "__main__":
     env = SinglePlayerSingleAgentEnv()
     episodes = 10
     
-    model = DQN("MultiInputPolicy", env, verbose=1)
-    model.learn(total_timesteps=25000)
+    model = DQN("MlpPolicy", env, verbose=1)
+    model.learn(total_timesteps=15000, progress_bar=True)
     
     all_episode_rewards = []
     
@@ -35,3 +35,6 @@ if __name__ == "__main__":
         mean_episode_reward = np.mean(all_episode_rewards)
         print("Episode {} finished".format(i))
         print("Mean reward:", mean_episode_reward, "Num episodes:", episodes)
+        
+        # save agent
+        model.save("dqn_single_player_single_agent")

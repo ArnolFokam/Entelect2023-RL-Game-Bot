@@ -123,6 +123,15 @@ namespace CyFi.Runner
         }
 
         /// <summary>
+        /// Allows bot to restart the game
+        /// </summary>
+        /// <returns></returns>
+        public void RestartGame()
+        {
+            engine.RestartGame();
+        }
+
+        /// <summary>
         ///     Allow bots to send actions to Engine
         /// </summary>
         /// <param name="command"></param>

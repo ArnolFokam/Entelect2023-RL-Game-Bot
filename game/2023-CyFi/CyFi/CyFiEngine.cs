@@ -212,6 +212,24 @@ namespace CyFi
             EndGame();
         }
 
+        public void RestartGame()
+        {
+            hubConnection.InvokeAsync("GameComplete");
+            TickTimer.Stop();
+            levels = new();
+            for (int level = 0; level < GameSettings.Levels.Count; level++)
+            {
+                levels.Add(WorldFactory.CreateWorld(GameSettings.Levels[level], level));
+            }
+
+            cyFiState = new CyFiState(
+                Levels: levels,
+                Bots: new List<Bot>()
+            );
+
+            CommandQueue.Clear();
+        }
+
         private void SetTimer(int timeLimit)
         {
             // Create a timer with a givin interval

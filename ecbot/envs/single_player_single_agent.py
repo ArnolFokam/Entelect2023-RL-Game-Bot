@@ -45,14 +45,9 @@ class SinglePlayerSingleAgentEnv(gym.Env):
         # STEAL - 12 (WIP wrench)
         self.action_space = gym.spaces.Discrete(12)
         
-        # Our CiFy agent only knows about its windowed view, 
-        # the collected items and the current level
+        # Our CiFy agent only knows about its windowed view of the world
         # Note: the agent is at the center of the window
-        self.observation_space = spaces.Dict(spaces={
-            "window": spaces.Box(low=0, high=6, shape=(33, 20), dtype=int),
-            "collected": spaces.Box(low=0, high=float("inf"), shape=(), dtype=int),
-            "level": spaces.Box(low=0, high=3, shape=(), dtype=int)
-        })
+        self.observation_space = spaces.Box(low=0, high=6, shape=(33 * 20,), dtype=int)
         
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
@@ -72,27 +67,27 @@ class SinglePlayerSingleAgentEnv(gym.Env):
         
         self._wait_for_game_state()
         observation, info, done = self._return_env_state()
-        reward = self._calculate_reward(observation)
+        reward = self._calculate_reward(info)
         
         return observation, reward, done, info
     
-    def _calculate_reward(self, observation):
+    def _calculate_reward(self, info):
         # reward is the number of collected items
         
-        if observation["collected"] <= self.last_collected:
-            if observation["level"] > self.current_level:
+        if info["collected"] <= self.last_collected:
+            if info["level"] > self.current_level:
                 # if bot when to new level
-                self.current_level = observation["level"]
+                self.current_level = info["level"]
                 return 2
             else:
                 # if bot lost a collectable and did not collect anything
                 return -1
         else:
             # if bot collected something
-            self.last_collected = observation["collected"]
+            self.last_collected = info["collected"]
             return 1
     
-    def render(self, observation):
+    def render(self, info):
         frame = np.zeros((self.window_height, self.window_width, 3), dtype=np.uint8)
         
         if self.render_mode == "human":
@@ -117,9 +112,13 @@ class SinglePlayerSingleAgentEnv(gym.Env):
             ))
             canvas.fill((255, 255, 255))
             
-            for x in range(self.window_width):
-                for y in range(self.window_height):
-                    frame[y, x] = self.cellToColor[observation["window"][y][x]]
+        
+        # draw the window and create numpy array    
+        for x in range(self.window_width):
+            for y in range(self.window_height):
+                frame[y, x] = self.cellToColor[info["window"][y][x]]
+                
+                if self.render_mode == "human":
                     pygame.draw.rect(
                         canvas,
                         frame[y, x],
@@ -130,7 +129,7 @@ class SinglePlayerSingleAgentEnv(gym.Env):
                             self.block_size
                         )
                     )
-            
+        if self.render_mode == "human": 
             # draw the bot     
             pygame.draw.rect(
                 canvas, 
@@ -153,19 +152,19 @@ class SinglePlayerSingleAgentEnv(gym.Env):
             # The following line will automatically add a delay to keep the framerate stable.
             self.clock.tick(self.metadata["render_fps"])
             
-        elif self.render_mode == "rgb_array":
+        if self.render_mode == "rgb_array":
             return frame
     
     def reset(self):
         # TODO: Handle case where game is already full
-        # TODO: Add endpoint on server to restart the game
-        self.game_client.reconnect()
+        # on game full, return error
+        self.game_client.new_game()
         
         self._wait_for_game_state()
-        observation, _, _ = self._return_env_state()
+        observation, info, _ = self._return_env_state()
         
         if self.render_mode == "human":
-            self.render(observation)
+            self.render(info)
         
         return observation
     
@@ -186,11 +185,7 @@ class SinglePlayerSingleAgentEnv(gym.Env):
             pass
         
     def _get_observation(self, game_state):
-        return {
-            "window": game_state[Constants.HERO_WINDOW],
-            "collected": game_state[Constants.COLLECTED],
-            "level": game_state[Constants.CURRENT_LEVEL],
-        }
+        return np.array(game_state[Constants.HERO_WINDOW], dtype=np.uint8).flatten()
         
     def _get_info(self, game_state):
         return {
@@ -198,5 +193,8 @@ class SinglePlayerSingleAgentEnv(gym.Env):
                 game_state[Constants.POSITION_X],
                 game_state[Constants.POSITION_Y],
             ),
+            "window": game_state[Constants.HERO_WINDOW],
             "elapsed_time": game_state[Constants.ELAPSED_TIME],
+            "collected": game_state[Constants.COLLECTED],
+            "level": game_state[Constants.CURRENT_LEVEL]
         }

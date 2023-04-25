@@ -44,7 +44,7 @@ class CiFyClient:
         self.connection = (
             HubConnectionBuilder()
             .with_url(f"{runner_ip}:5000/runnerhub")
-            .configure_logging(LogLevel.DEBUG)
+            .configure_logging(LogLevel.ERROR)
             .with_automatic_reconnect(
                 {
                     "keep_alive_interval": 10,
@@ -103,6 +103,12 @@ class CiFyClient:
         }])
         time.sleep(0.1)
         
+    def register_new_player(self):
+        # register new bot
+        print("Registering bot")
+        bot_nickname = os.getenv("BOT_NICKNAME") or f"AAIIGBot-{uuid.uuid1()}"
+        self.connection.send("Register", [bot_nickname])
+        time.sleep(0.1)
         
     def connect(self):
         # initiate connection with the game server
@@ -110,17 +116,17 @@ class CiFyClient:
         self.connection.start()
         time.sleep(0.1)
         
-        # register new bot
-        print("Registering bot")
-        bot_nickname = os.getenv("BOT_NICKNAME") or f"AAIIGBot-{uuid.uuid1()}"
-        self.connection.send("Register", [bot_nickname])
-        time.sleep(0.1)
+        self.register_new_player()
         
     def disconnect(self):
         print("Disconnecting bot...")
         self.connection.stop()
         time.sleep(0.1)
         
-    def reconnect(self):
-        self.disconnect()
+    def new_game(self):
         self.connect()
+        
+        self.connection.send("RestartGame", [])
+        time.sleep(0.1)
+        
+        self.register_new_player()
