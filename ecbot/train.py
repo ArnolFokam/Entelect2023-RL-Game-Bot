@@ -11,7 +11,7 @@ if __name__ == "__main__":
     episodes = 10
     
     model = DQN("MlpPolicy", env, verbose=1, buffer_size=200000)
-    model.learn(total_timesteps=15000000, progress_bar=True)
+    model.learn(total_timesteps=500000, progress_bar=True)
     
     # save agent
     model.save("dqn_single_player_single_agent")
