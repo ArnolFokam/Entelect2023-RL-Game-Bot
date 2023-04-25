@@ -30,7 +30,7 @@ class State:
     bot_state: List[Dict[str, Any]] = field(default_factory=list) 
     
     # game is completed
-    completed: bool = False
+    game_completed: bool = False
 
 class CiFyClient:
     
@@ -85,7 +85,7 @@ class CiFyClient:
         
         # When the GameCompleted command is sent from the runner.
         def on_game_completed():
-            self.state.completed = True
+            self.state.game_completed = True
             print("Game completed")
                 
 
@@ -95,6 +95,9 @@ class CiFyClient:
         self.connection.on("Registered", on_registered)
         self.connection.on("ReceiveBotState", on_receive_bot_state)
         self.connection.on("GameCompleted", on_game_completed)
+        
+        # connect to the game server
+        self.connect()
         
     def send_player_command(self, action: int):
         self.connection.send("SendPlayerCommand", [{
@@ -124,8 +127,6 @@ class CiFyClient:
         time.sleep(0.1)
         
     def new_game(self):
-        self.connect()
-        
         self.connection.send("RestartGame", [])
         time.sleep(0.1)
         

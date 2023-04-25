@@ -67,25 +67,11 @@ class SinglePlayerSingleAgentEnv(gym.Env):
         
         self._wait_for_game_state()
         observation, info, done = self._return_env_state()
-        reward = self._calculate_reward(info)
-        
+        reward = self._calculate_reward(done)
         return observation, reward, done, info
     
-    def _calculate_reward(self, info):
-        # reward is the number of collected items
-        
-        if info["collected"] <= self.last_collected:
-            if info["level"] > self.current_level:
-                # if bot when to new level
-                self.current_level = info["level"]
-                return 2
-            else:
-                # if bot lost a collectable and did not collect anything
-                return -1
-        else:
-            # if bot collected something
-            self.last_collected = info["collected"]
-            return 1
+    def _calculate_reward(self, done):
+        return -0.01 if not done else 1
     
     def render(self, info):
         frame = np.zeros((self.window_height, self.window_width, 3), dtype=np.uint8)
@@ -156,9 +142,17 @@ class SinglePlayerSingleAgentEnv(gym.Env):
             return frame
     
     def reset(self):
-        # TODO: Handle case where game is already full
-        # on game full, return error
-        self.game_client.new_game()
+        # There are two cases of reset:
+        # collected obtained => no new game
+        # level completed => new game
+        
+        if self.game_client.state.game_completed:
+            self.game_client.new_game()
+            
+        # handle the case the when the game is full of players
+        # you could for example throw an error or restart the game
+        # what might be nice is to ask for user input about that
+        # but only when when doing interactive training.
         
         self._wait_for_game_state()
         observation, info, _ = self._return_env_state()
@@ -177,8 +171,19 @@ class SinglePlayerSingleAgentEnv(gym.Env):
             pygame.quit()
         
     def _return_env_state(self):
-        game_state = self.game_client.state.bot_state.pop(0)
-        return self._get_observation(game_state), self._get_info(game_state), self.game_client.state.completed
+        # get more faithful game state from the previous
+        game_state = self.game_client.state.bot_state.pop(-1)
+        
+        # get observation and info
+        observation = self._get_observation(game_state)
+        info = self._get_info(game_state)
+        completed = self.game_client.state.game_completed
+        
+        if self.last_collected > info["collected"] or self.current_level < info["current_level"]:
+            completed = True
+        
+        return observation, info, completed
+        
     
     def _wait_for_game_state(self):
         while not len(self.game_client.state.bot_state) > 0:
@@ -196,5 +201,5 @@ class SinglePlayerSingleAgentEnv(gym.Env):
             "window": game_state[Constants.HERO_WINDOW],
             "elapsed_time": game_state[Constants.ELAPSED_TIME],
             "collected": game_state[Constants.COLLECTED],
-            "level": game_state[Constants.CURRENT_LEVEL]
+            "current_level": game_state[Constants.CURRENT_LEVEL]
         }

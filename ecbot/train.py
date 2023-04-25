@@ -7,11 +7,14 @@ from .envs.single_player_single_agent import SinglePlayerSingleAgentEnv
 if __name__ == "__main__":
     # there is only one player and one 
     # learnig agent in this environment
-    env = SinglePlayerSingleAgentEnv()
+    env = SinglePlayerSingleAgentEnv(render_mode="human")
     episodes = 10
     
-    model = DQN("MlpPolicy", env, verbose=1)
-    model.learn(total_timesteps=15000, progress_bar=True)
+    model = DQN("MlpPolicy", env, verbose=1, buffer_size=200000)
+    model.learn(total_timesteps=1000, progress_bar=True)
+    
+    # save agent
+    model.save("dqn_single_player_single_agent")
     
     all_episode_rewards = []
     
@@ -26,9 +29,11 @@ if __name__ == "__main__":
         
         while not done:
             action, _ = model.predict(observation, deterministic=False)
+            # print("Action:", action)
             # action = env.action_space.sample()  # choose random action
             observation, reward, done, info = env.step(action)  # feedback from environment
             episode_reward.append(reward) # save reward for this step
+            env.render(info) # render environment
             
         all_episode_rewards.append(sum(episode_reward))
         
@@ -36,5 +41,4 @@ if __name__ == "__main__":
         print("Episode {} finished".format(i))
         print("Mean reward:", mean_episode_reward, "Num episodes:", episodes)
         
-        # save agent
-        model.save("dqn_single_player_single_agent")
+        
