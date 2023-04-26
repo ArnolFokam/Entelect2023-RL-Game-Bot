@@ -70,6 +70,7 @@ class SinglePlayerSingleAgentEnv(gym.Env):
     def _calculate_reward(self, done):
         return -0.01 if not done else 1
     
+
     def render(self, mode=None):
         assert mode is None or mode in self.metadata["render_modes"]
         frame = np.zeros((self.window_height, self.window_width, 3), dtype=np.uint8)
