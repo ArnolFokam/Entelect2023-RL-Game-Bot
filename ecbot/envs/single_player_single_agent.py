@@ -12,8 +12,8 @@ class SinglePlayerSingleAgentEnv(gym.Env):
         "render_fps": 60,
     }
     
-    window_height = 33 # must be equal to the height of the window as defined in the hero window
-    window_width = 20 # must be equal to the width of the window as defined in the hero window
+    window_height = 20 # must be equal to the height of the window as defined in the hero window
+    window_width = 33 # must be equal to the width of the window as defined in the hero window
     block_size = 16
     
     cellToColor = {
@@ -120,8 +120,8 @@ class SinglePlayerSingleAgentEnv(gym.Env):
                 canvas, 
                 self.cellToColor[7], 
                 pygame.Rect(
-                    (self.window_width // 2) * self.block_size, 
-                    (self.window_height // 2) * self.block_size, 
+                    ((self.window_width - 2) // 2) * self.block_size, 
+                    ((self.window_height - 2) // 2) * self.block_size,
                     # hero occupties 2x2 blocks
                     2 * self.block_size, 
                     2 * self.block_size
@@ -194,7 +194,7 @@ class SinglePlayerSingleAgentEnv(gym.Env):
                 game_state[Constants.POSITION_X],
                 game_state[Constants.POSITION_Y],
             ),
-            "window": game_state[Constants.HERO_WINDOW],
+            "window": np.rot90(game_state[Constants.HERO_WINDOW]),
             "elapsed_time": game_state[Constants.ELAPSED_TIME],
             "collected": game_state[Constants.COLLECTED],
             "current_level": game_state[Constants.CURRENT_LEVEL]

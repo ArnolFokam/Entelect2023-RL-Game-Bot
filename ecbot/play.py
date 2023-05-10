@@ -55,7 +55,7 @@ if __name__ == "__main__":
     # game receives the input, before training
     while not done:
         supported_input = check_keyboard_input()
-        print(supported_input)
+
         if supported_input is not None:
             # action = env.action_space.sample()
             obs, reward, done, info = env.step(supported_input)

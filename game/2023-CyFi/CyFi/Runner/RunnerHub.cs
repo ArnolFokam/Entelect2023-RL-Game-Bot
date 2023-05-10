@@ -40,7 +40,7 @@ namespace CyFi.Runner
         {
             try
             {
-                _logger.Console(LogLevel.Debug, "New Connection");
+                _logger.ConsoleL(LogLevel.Debug, "New Connection");
                 await base.OnConnectedAsync();
             }
             catch (Exception ex)
@@ -57,7 +57,7 @@ namespace CyFi.Runner
         /// <returns></returns>
         public override Task OnDisconnectedAsync(Exception? exception)
         {
-            _logger.Console(LogLevel.Debug, exception?.Message, exception);
+            _logger.ConsoleL(LogLevel.Debug, exception?.Message, exception);
             //TODO: Implement any game specific logic to remove a bot
             return base.OnDisconnectedAsync(exception);
         }
@@ -86,9 +86,9 @@ namespace CyFi.Runner
         /// <returns></returns>
         public async Task GameComplete()
         {
-            _logger.Console(LogLevel.Information, "Game Complete");
 
-
+            Console.WriteLine("Game Completeted");
+            _logger.ConsoleL(LogLevel.Information, "Game Complete");
 
             await Clients.All.SendAsync("ReceiveGameComplete");
             await _cloudIntegrationService.Announce(CloudCallbackType.Finished);
@@ -120,15 +120,6 @@ namespace CyFi.Runner
                 await Clients.Caller.SendAsync("Disconnect", ex.Message);
                 return;
             }
-        }
-
-        /// <summary>
-        /// Allows bot to restart the game
-        /// </summary>
-        /// <returns></returns>
-        public void RestartGame()
-        {
-            engine.RestartGame();
         }
 
         /// <summary>
