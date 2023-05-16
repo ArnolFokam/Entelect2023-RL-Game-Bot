@@ -1,0 +1,21 @@
+defaults:
+  - spsa
+  - _self_
+
+# general
+output_dir: 
+
+# agent
+agent_name: ppo
+
+gamma: 0.99
+batch_size: 64
+num_epochs: 10
+num_steps: 2048
+learning_rate: 0.00003
+training_steps: 220000
+
+# evaluation
+render: True
+deterministic: False
+n_eval_episodes: 100

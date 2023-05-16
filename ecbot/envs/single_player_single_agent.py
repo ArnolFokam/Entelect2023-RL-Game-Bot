@@ -13,7 +13,7 @@ class SinglePlayerSingleAgentEnv(gym.Env):
     }
     
     window_height = 20 # must be equal to the height of the window as defined in the hero window
-    window_width = 33 # must be equal to the width of the window as defined in the hero window
+    window_width = 34 # must be equal to the width of the window as defined in the hero window
     block_size = 16
     
     cellToColor = {
@@ -27,7 +27,11 @@ class SinglePlayerSingleAgentEnv(gym.Env):
         7: (255, 255, 0), # hero bot => yellow
     }
     
-    def __init__(self):
+    def __init__(self, cfg):
+
+        self.cfg = cfg
+        
+        # initialise the game client
         self.game_client = CiFyClient()
         
         # Our CiFy agent has 12 possible actions
@@ -47,7 +51,7 @@ class SinglePlayerSingleAgentEnv(gym.Env):
         
         # Our CiFy agent only knows about its windowed view of the world
         # Note: the agent is at the center of the window
-        self.observation_space = spaces.Box(low=0, high=6, shape=(33 * 20,), dtype=int)
+        self.observation_space = spaces.Box(low=0, high=6, shape=(34 * 20,), dtype=int)
         
         # window and clock rate for 
         # the defined rendering modes
@@ -68,6 +72,7 @@ class SinglePlayerSingleAgentEnv(gym.Env):
         return self.observation, reward, done, self.info
     
     def _calculate_reward(self, done):
+        # TODO: reward
         return -0.01 if not done else 1
     
 
@@ -120,8 +125,8 @@ class SinglePlayerSingleAgentEnv(gym.Env):
                 canvas, 
                 self.cellToColor[7], 
                 pygame.Rect(
-                    ((self.window_width - 2) // 2) * self.block_size, 
-                    ((self.window_height - 2) // 2) * self.block_size,
+                    ((self.window_width // 2) - 1) * self.block_size, 
+                    ((self.window_height // 2)) * self.block_size,
                     # hero occupties 2x2 blocks
                     2 * self.block_size, 
                     2 * self.block_size
@@ -167,6 +172,8 @@ class SinglePlayerSingleAgentEnv(gym.Env):
             pygame.quit()
         
     def _return_env_state(self):
+        #TODO: reward
+        
         # get more faithful game state from the previous
         game_state = self.game_client.state.bot_state.pop(-1)
         
@@ -174,9 +181,6 @@ class SinglePlayerSingleAgentEnv(gym.Env):
         self.observation = self._get_observation(game_state)
         self.info = self._get_info(game_state)
         completed = self.game_client.state.game_completed
-        
-        if self.last_collected > self.info["collected"] or self.current_level < self.info["current_level"]:
-            completed = True
         
         return self.observation, self.info, completed
         
