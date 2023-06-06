@@ -1,6 +1,7 @@
 import hydra
 from omegaconf import DictConfig
 
+from hydra.core.hydra_config import HydraConfig
 from stable_baselines3.common.evaluation import evaluate_policy
 
 from ecbot.envs import environments
@@ -19,8 +20,8 @@ def main(cfg: DictConfig) -> None:
     )
     
     # save agent
-    results_dir = get_dir(cfg.results_dir)
-    saved_agent_dir = f"{results_dir}/{cfg.env_name}_{cfg.agent_name}_{generate_random_string(5)}"
+    output_dir = get_dir(HydraConfig.get().runtime.output_dir)
+    saved_agent_dir = f"{output_dir}/{cfg.env_name}_{cfg.agent_name}_{generate_random_string(5)}"
     agent.save(saved_agent_dir)
     
     # Load the trained agent

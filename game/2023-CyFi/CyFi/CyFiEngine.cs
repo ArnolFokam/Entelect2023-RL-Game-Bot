@@ -107,7 +107,7 @@ namespace CyFi
             }
             SetTimer(GameSettings.TickTimer);
 
-            if (cyFiState.Bots.Count >= GameSettings.NumberOfPlayers)
+            if (cyFiState.Bots.Count >= GameSettings.NumberOfPlayers) // FOKAM: shouldn't it be equal?
             {
                 try
                 {

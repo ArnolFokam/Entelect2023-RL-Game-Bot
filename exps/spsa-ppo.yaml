@@ -2,9 +2,6 @@ defaults:
   - spsa
   - _self_
 
-# general
-output_dir: 
-
 # agent
 agent_name: ppo
 

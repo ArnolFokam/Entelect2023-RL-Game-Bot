@@ -104,14 +104,14 @@ class CiFyClient:
             "Action" : action,                                   
             "BotId" : self.state.bot_id,
         }])
-        time.sleep(0.6)
+        time.sleep(0.1)
         
     def register_new_player(self):
         # register new bot
         print("Registering bot")
         bot_nickname = os.getenv("BOT_NICKNAME") or f"AAIIGBot-{uuid.uuid1()}"
         self.connection.send("Register", [bot_nickname])
-        time.sleep(0.1)
+        time.sleep(0.6)
         
     def connect(self):
         # initiate connection with the game server

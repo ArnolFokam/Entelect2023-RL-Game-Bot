@@ -1,2 +1,6 @@
+hydra:
+  sweep:
+    subdir: ${hydra.job.override_dirname}
+
 # environment
 env_name: spsa
