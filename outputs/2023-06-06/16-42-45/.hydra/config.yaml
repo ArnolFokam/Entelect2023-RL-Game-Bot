@@ -1,0 +1,14 @@
+env_name: spsa
+agent_name: dqn
+policy_net: mlp
+learning_rate: 0.0001
+num_hidden_layers: 3
+hidden_dim: 128
+batch_size: 32
+tau: 0.9996
+gamma: 0.99
+buffer_size: 1000
+num_episodes: 20
+render: true
+deterministic: false
+n_eval_episodes: 100

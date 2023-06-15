@@ -1,6 +1,6 @@
-from ecbot.agents.ppo import PPO
+from ecbot.agents.dqn import DQN
 
 
 agents = {
-    "ppo": PPO
+    "dqn": DQN
 }

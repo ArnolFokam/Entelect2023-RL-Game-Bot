@@ -1,0 +1,8 @@
+env_name: spsa
+agent_name: dqn
+num_hidden_layers: 3
+hidden_dim: 128
+policy_net: mlp
+render: true
+deterministic: false
+n_eval_episodes: 100

@@ -1,7 +1,6 @@
 import numpy as np
 
 import gym
-import pygame
 from gym import spaces
 
 from ecbot.connection import Constants
