@@ -33,7 +33,7 @@ class SinglePlayerSingleAgentEnv(CyFi):
         self.observation_space = spaces.Box(low=0, high=6, shape=(34 * 22,), dtype=int)
         
         # to calculate reward
-        self.decay_factor = 0.1
+        self.decay_factor = 0.3
         self.reward_backup_len = 15
         self.past_reward_threshold = 0.01
         self.position_reward = defaultdict(lambda : 10)
@@ -45,7 +45,7 @@ class SinglePlayerSingleAgentEnv(CyFi):
         # decay the reward
         self.position_reward[position] = reward * self.decay_factor
         
-        return 0.0
+        return reward
         
     def step(self, action: int):
         
