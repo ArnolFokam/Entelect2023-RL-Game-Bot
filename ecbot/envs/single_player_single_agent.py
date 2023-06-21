@@ -1,5 +1,5 @@
 import numpy as np
-from collections import defaultdict
+from collections import defaultdict, deque
 
 import gym
 from gym import spaces
@@ -9,7 +9,7 @@ from ecbot.envs.cyfi import CyFi
 
 class SinglePlayerSingleAgentEnv(CyFi):
     
-    def __init__(self, cfg, max_timesteps=20):
+    def __init__(self, cfg):
 
         super().__init__(cfg)
         
@@ -32,13 +32,12 @@ class SinglePlayerSingleAgentEnv(CyFi):
         # Note: the agent is at the center of the window
         self.observation_space = spaces.Box(low=0, high=6, shape=(34 * 22,), dtype=int)
         
-        # ma world time steps
-        self.max_timesteps = max_timesteps
-        self.current_step = 0
-        
         # to calculate reward
-        self.decay_factor = 0.5
+        self.decay_factor = 0.1
+        self.reward_backup_len = 15
+        self.past_reward_threshold = 0.01
         self.position_reward = defaultdict(lambda : 10)
+        self.past_k_rewards = deque([], maxlen=self.reward_backup_len) 
         
     def _calculate_reward(self, position, *args, **kwargs):
         reward = self.position_reward[position]
@@ -46,25 +45,24 @@ class SinglePlayerSingleAgentEnv(CyFi):
         # decay the reward
         self.position_reward[position] = reward * self.decay_factor
         
-        return reward
+        return 0.0
         
     def step(self, action: int):
-        
-        self.current_step += 1
         
         # command from the  game server are 1-indexed
         self.game_client.send_player_command(int(action + 1))
         self._wait_for_game_state()
         
         self.observation, self.info, done = self._return_env_state()
-        done = done or self.current_step > self.max_timesteps
         reward = self._calculate_reward(self.info["position"])
-            
-        return self.observation, reward, done or self.current_step >= self.max_timesteps, self.info
+        
+        self.past_k_rewards.append(reward)
+        done = done or np.mean(self.past_k_rewards) < self.past_reward_threshold
+        return self.observation, reward, done, self.info
     
     def reset(self):
         observation = super().reset()
-        self.current_step = 0
+        self.past_k_rewards = deque([], maxlen=self.reward_backup_len) 
         self.position_reward = defaultdict(lambda : 10)
         return observation
         

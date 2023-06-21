@@ -1,6 +1,7 @@
-from copy import deepcopy
+import os
 import math
 import random
+from copy import deepcopy
 from itertools import count
 from collections import deque, namedtuple
 
@@ -57,6 +58,9 @@ class DQN(BaseAgent):
         else:
             return torch.tensor([[self.env.action_space.sample()]], device=device, dtype=torch.long)
         
+    def evaluate(self):
+        # TODO: write an evaluate function
+        pass
     
     def learn(self):
         self.steps_done = 0
@@ -143,6 +147,16 @@ class DQN(BaseAgent):
                 
                 if done:
                     break
+                
+    def save(self, dir):
+        torch.save({
+            "target_network": self.target_network.state_dict()
+        }, os.path.join(dir, "dqn.pt"))
+        
+    def load(self, dir):
+        self.policy_network.load_state_dict(torch.load(os.path.join(dir, "dqn.pt"))["target_network"])
+        self.target_network = deepcopy(self.policy_network)
+        
             
             
         
