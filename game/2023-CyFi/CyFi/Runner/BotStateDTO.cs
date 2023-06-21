@@ -7,34 +7,42 @@ namespace CyFi.Runner
     public class BotStateDTO
     {
         public int CurrentLevel { get; set; }
+        public string CurrentState { get; set; }
         public string ConnectionId { get; set; }
 
         public int Collected { get; set; }
 
         public string ElapsedTime { get; set; }
+        public int GameTick { get; set; }
 
         public int[][] HeroWindow { get; set; }
 
         public int X { get; set; }
         public int Y { get; set; }
         //  public Dictionary<int,int> radarData { get; set; }
-        public string RadarData { get; set; }
+        public int[][] RadarData { get; set; }
 
         public BotStateDTO()
         {
 
         }
 
-        public BotStateDTO(Bot bot, List<Bot> opposingBots, HeroEntity hero, WorldObject world)
+        public BotStateDTO(Bot bot, List<Bot> opposingBots, HeroEntity hero, WorldObject world, int gameTick)
         {
             this.ConnectionId = bot.ConnectionId;
             this.CurrentLevel = bot.CurrentLevel;
+            this.CurrentState = hero.MovementSm.CurrentState.name;
             this.Collected = hero.Collected;
-            this.ElapsedTime = hero.End.Subtract(hero.Start).ToString("g");
-            this.RadarData = string.Join(",", hero.radarData);
+            this.ElapsedTime = bot.LastUpdated.Subtract(hero.Start).ToString("g");
+            this.GameTick = gameTick;
 
             X = hero.XPosition;
             Y = hero.YPosition;
+
+            this.RadarData = hero.radarData.Select(data => new int[] {
+                data.DirectionFromOpponent,
+                data.PercentageDistance
+            }).ToArray();
 
             var coordinates = hero.HeroWindow();
             int windowLength = Math.Abs(coordinates[1].X - coordinates[0].X);

@@ -571,3 +571,4 @@ __pycache__/
 
 # user added ignores
 .vscode/
+outputs/

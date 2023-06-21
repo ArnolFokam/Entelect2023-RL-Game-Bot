@@ -1,7 +1,5 @@
 ﻿using CyFi.Models;
-using CyFi.RootState;
 using Domain.Objects;
-using Logger;
 using Microsoft.Extensions.Logging;
 using static CyFi.Settings.MapSettings;
 
@@ -21,6 +19,7 @@ namespace CyFi.Factories
 
             ILogger<WorldObject> worldLogger = loggerFactory.CreateLogger<WorldObject>();
 
+            //          worldGenerator = WorldObject(width, height, 'seed', 50, 0.025, 0, 0, 0.13, 0.005, 1, 6, 9)
             return new WorldObject(
                 mapSettings.Width,
                 mapSettings.Height,
@@ -28,13 +27,12 @@ namespace CyFi.Factories
                 fillThreshold,
                 minPathWidth,
                 maxPathWidth,
-                minPathHeight,
-                maxPathHeight,
+                minPathHeight[level],
+                maxPathHeight[level],
                 pathCleanupWidth,
                 level,
                 minConnections,
-                maxConnections,
-                worldLogger
+                maxConnections
             );
         }
     }
