@@ -82,7 +82,6 @@ class DQN(BaseAgent):
                 action = self._select_action(state, device)
                 observation, reward, done, _ = self.env.step(action.item())
                 reward = torch.tensor([reward], device=device)
-                self.env.render(mode="human")
                 
                 if done:
                     next_state = None
