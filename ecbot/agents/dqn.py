@@ -1,3 +1,4 @@
+from copy import deepcopy
 import math
 import random
 from itertools import count
@@ -36,18 +37,13 @@ class DQN(BaseAgent):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         
-        self.target_network = policy_nets[self.cfg.policy_net](
-            num_actions=self.num_actions,
-            observation_shape=self.observation_shape, 
-            hidden_dim=self.cfg.hidden_dim,
-            num_hidden_layers=self.cfg.num_hidden_layers
-        )
         self.policy_network = policy_nets[self.cfg.policy_net](
             num_actions=self.num_actions,
             observation_shape=self.observation_shape, 
             hidden_dim=self.cfg.hidden_dim,
             num_hidden_layers=self.cfg.num_hidden_layers
         )
+        self.target_network = deepcopy(self.policy_network)
         
     def _select_action(self, state, device):
         sample = random.random()
@@ -65,6 +61,9 @@ class DQN(BaseAgent):
     def learn(self):
         self.steps_done = 0
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.policy_network = self.policy_network.to(device)
+        self.target_network = self.target_network.to(device)
+        
         optimizer = optim.AdamW(self.policy_network.parameters(), lr=self.cfg.learning_rate, amsgrad=True)
         memory = ReplayMemory(self.cfg.buffer_size)
         
@@ -75,10 +74,11 @@ class DQN(BaseAgent):
             state = self.env.reset()
             state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
             
-            for t in count():
+            for _ in count():
                 action = self._select_action(state, device)
                 observation, reward, done, _ = self.env.step(action.item())
                 reward = torch.tensor([reward], device=device)
+                self.env.render(mode="human")
                 
                 if done:
                     next_state = None

@@ -29,7 +29,7 @@ namespace CyFi
 
         public CyFiGameSettings GameSettings;
 
-        private readonly BotFactory BotFactory;
+        private BotFactory BotFactory;
         public static Timer TickTimer;
         public IGameLogger<CyFiEngine> Logger;
         public IGameLogger<CyFiState> StateLogger;
@@ -46,6 +46,15 @@ namespace CyFi
 
         public ICloudIntegrationService cloudIntegrationService;
 
+        // save parameters
+
+        public IOptions<CyFiGameSettings> settings;
+
+        public WorldFactory worldFactory;
+        public ILogger<CyFiEngine> InitLogger;
+        public  ILogger<CyFiState> InitStateLogger;
+        public ILogger<GameComplete> InitGameCompleteLogger;
+
         public CyFiEngine(
             IOptions<CyFiGameSettings> settings,
             IHubContext<RunnerHub> context,
@@ -58,6 +67,33 @@ namespace CyFi
             ICloudIntegrationService cloudIntegrationService
             )
         {
+
+            this.settings = settings;
+            this.context = context;
+            this.BotFactory = botFactory;
+            this.worldFactory = worldFactory;
+            this.CommandQueue = CommandQueue;
+            this.cloudIntegrationService = cloudIntegrationService;
+            this.InitLogger = Logger;
+            this.InitStateLogger = StateLogger;
+            this.InitGameCompleteLogger = GameCompleteLogger;
+
+            Init(
+                settings,
+                Logger,
+                StateLogger,
+                GameCompleteLogger,
+                worldFactory
+            );
+        }
+
+        public void Init(
+            IOptions<CyFiGameSettings> settings,
+            ILogger<CyFiEngine> Logger,
+            ILogger<CyFiState> StateLogger,
+            ILogger<GameComplete> GameCompleteLogger,
+            WorldFactory worldFactory
+        ){
             GameSettings = settings.Value;
             cloudSeed = Environment.GetEnvironmentVariable("WORLD_SEED") ?? "0";
             GameSettings.Levels.ForEach(level => level.Seed = int.Parse(cloudSeed) + level.Seed);
@@ -74,15 +110,10 @@ namespace CyFi
                 Logger
             );
 
-            this.CommandQueue = CommandQueue;
+
+            this.GameCompleteLogger = new GameLogger<GameComplete>(GameCompleteLogger);
             this.Logger = new GameLogger<CyFiEngine>(Logger);
             this.StateLogger = new GameLogger<CyFiState>(StateLogger);
-            this.GameCompleteLogger = new GameLogger<GameComplete>(GameCompleteLogger);
-            this.BotFactory = botFactory;
-
-            this.context = context;
-
-            this.cloudIntegrationService = cloudIntegrationService;
 
             // Create a timer with a given interval
             TickTimer = new Timer(GameSettings.TickTimer);
@@ -274,30 +305,33 @@ namespace CyFi
 
             var rankedBots = cyFiState.Bots.OrderByDescending(bot => bot.TotalPoints).ToList();
 
-            var gameComplete = new GameComplete
-            {
-                TotalTicks = cyFiState.Tick,
-                Players = rankedBots.Select((bot, index) =>
-                    new PlayerResult
-                    {
-                        Placement = index + 1,
-                        Score = bot.TotalPoints,
-                        Id = bot.Id.ToString(),
-                        Nickname = bot.NickName,
-                        MatchPoints = (cyFiState.Bots.Count - (index + 1)) * 2
-                    }
-                ).ToList(),
-                WorldSeeds = GameSettings.Levels.Select(l => l.Seed).ToList(),
-                WinngingBot = rankedBots.First()
-            };
-
             for (int index = 0; index < rankedBots.Count; index++)
             {
                 var currentBot = rankedBots[index];
                 cloudIntegrationService.UpdatePlayer(currentBot.Id.ToString(), finalScore: currentBot.TotalPoints, matchPoints: currentBot.TotalPoints, placement: index + 1);
             }
 
-            GameCompleteLogger.File(gameComplete, null, "GameComplete");
+
+            if (rankedBots.Count > 0) {
+                var gameComplete = new GameComplete
+                {
+                    TotalTicks = cyFiState.Tick,
+                    Players = rankedBots.Select((bot, index) =>
+                        new PlayerResult
+                        {
+                            Placement = index + 1,
+                            Score = bot.TotalPoints,
+                            Id = bot.Id.ToString(),
+                            Nickname = bot.NickName,
+                            MatchPoints = (cyFiState.Bots.Count - (index + 1)) * 2
+                        }
+                    ).ToList(),
+                    WorldSeeds = GameSettings.Levels.Select(l => l.Seed).ToList(),
+                    WinngingBot = rankedBots.First()
+                };
+                GameCompleteLogger.File(gameComplete, null, "GameComplete");
+            }
+
             StateLogger.File(null, FILE_STATE.END);
             //Disconnect all bots
             hubConnection.InvokeAsync("GameComplete", int.Parse(cloudSeed), cyFiState.Tick);
@@ -309,6 +343,20 @@ namespace CyFi
             TickTimer.Stop();
             Console.WriteLine("Timer ran out :(");
             EndGame();
+        }
+
+        public async void RestartGame(){
+            GracefulShutdown();
+            // re-init world
+            Init(
+                settings,
+                InitLogger,
+                InitStateLogger,
+                InitGameCompleteLogger,
+                worldFactory
+            );
+            await StartGame();
+
         }
 
         private void SetTimer()

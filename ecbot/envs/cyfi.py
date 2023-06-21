@@ -108,7 +108,7 @@ class CyFi(gym.Env):
     def _return_env_state(self):
         
         # get more faithful game state from the previous
-        game_state = self.game_client.state.bot_state.pop(-1)
+        game_state = self.game_client.state.bot_state.pop()
         
         # get observation and info
         self.observation = self._get_observation(game_state)
@@ -124,14 +124,9 @@ class CyFi(gym.Env):
         raise NotImplementedError
     
     def reset(self):
-        # There are two cases of reset:
-        # collected obtained => no new game
-        # level completed => new game
-        
-        if self.game_client.state.game_completed:
-            self.game_client.new_game()
+        self.game_client.new_game()
             
-        # handle the case the when the game is full of players
+        # TODO: handle the case the when the game is full of players
         # you could for example throw an error or restart the game
         # what might be nice is to ask for user input about that
         # but only when when doing interactive training.

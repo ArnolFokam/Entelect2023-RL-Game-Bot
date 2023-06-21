@@ -11,9 +11,8 @@ class BaseAgent:
         
         # initialize the env and info about the env
         self.env = env
-        state = self.env.reset()
-        assert isinstance(state, (np.ndarray, Tensor)), "state space must a numpy array or a tensor"
-        self.observation_shape = state.shape
+        self.num_actions = self.env.action_space.n
+        self.observation_shape = self.env.observation_space.shape
         
     def learn(self):
         raise NotImplementedError
