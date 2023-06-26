@@ -8,7 +8,7 @@ from ecbot.connection import CiFyClient
 class CyFi(gym.Env):
     metadata = {
         "render_modes": ["human"], 
-        "render_fps": 60,
+        "render_fps": 4,
     }
     
     cellToColor = {
@@ -27,6 +27,8 @@ class CyFi(gym.Env):
     block_size = 16 # block size per cell in the hero window
     
     def __init__(self, cfg) -> None:
+        assert cfg.render_mode is None or cfg.render_mode in self.metadata["render_modes"]
+        
         # save configurations
         self.cfg = cfg
         
@@ -37,69 +39,99 @@ class CyFi(gym.Env):
         # the defined rendering modes
         self.window = None
         self.clock = None
-    
-    def render(self, mode=None):
-        """Rendering done only through PyGame"""
-        assert mode is None or mode in self.metadata["render_modes"]
             
-        # initialise pygame if not already initialised
-        if self.window is None:
-            pygame.init()
-            pygame.display.init()
-            self.window = pygame.display.set_mode((
+    def render(self):
+        """Rendering done only through PyGame"""
+        
+        frame = np.full(
+            (self.window_height * self.block_size, self.window_width * self.block_size, 3),
+            fill_value=255,
+            dtype=np.int8
+        )
+        
+        if self.cfg.render_mode == "human":
+
+            # initialise pygame if not already initialised
+            if self.window is None:
+                pygame.init()
+                pygame.display.init()
+                self.window = pygame.display.set_mode((
+                    
+                    self.window_width * self.block_size,
+                    self.window_height * self.block_size,
+                ))
                 
+            # initialise clock if not already initialised
+            if self.clock is None:
+                self.clock = pygame.time.Clock()
+            
+            # create a canvas to draw on
+            canvas = pygame.Surface((
                 self.window_width * self.block_size,
                 self.window_height * self.block_size,
             ))
-            
-        # initialise clock if not already initialised
-        if self.clock is None:
-            self.clock = pygame.time.Clock()
-        
-        # create a canvas to draw on
-        canvas = pygame.Surface((
-            self.window_width * self.block_size,
-            self.window_height * self.block_size,
-        ))
-        canvas.fill((255, 255, 255))
+            canvas.fill((255, 255, 255))
             
         # draw the window and create numpy array    
         for x in range(self.window_width):
             for y in range(self.window_height):
+                # build a block of color
+                color = self.cellToColor[self.info["window"][y][x]]
+                block = np.zeros((self.block_size, self.block_size, 3), dtype=np.uint8)
+                block[:, :, 0] = color[0]
+                block[:, :, 1] = color[1]
+                block[:, :, 2] = color[2]
+                
+                pos_x, pos_y = x * self.block_size, y * self.block_size
+                frame[pos_y : pos_y + self.block_size, pos_x : pos_x + self.block_size, :] = block
+                
                 # draw the window
-                if mode == "human":
+                if self.cfg.render_mode == "human":
                     pygame.draw.rect(
                         canvas,
-                        self.cellToColor[self.info["window"][y][x]],
+                        color,
                         pygame.Rect(
-                            x * self.block_size,
-                            y * self.block_size, 
+                            pos_x,
+                            pos_y, 
                             self.block_size, 
                             self.block_size
                         )
                     )
     
-        # draw the bot     
-        pygame.draw.rect(
-            canvas, 
-            self.cellToColor[7], 
-            pygame.Rect(
-                ((self.window_width // 2) - 1) * self.block_size, 
-                ((self.window_height // 2)) * self.block_size,
-                # hero occupties 2x2 blocks
-                2 * self.block_size, 
-                2 * self.block_size
+        # draw the bot  
+        color_bot = self.cellToColor[7]
+        block_bot = np.zeros((self.block_size * 2, self.block_size * 2, 3), dtype=np.uint8)
+        block_bot[:, :, 0] = color_bot[0]
+        block_bot[:, :, 1] = color_bot[1]
+        block_bot[:, :, 2] = color_bot[2]
+        
+        pos_x, pos_y = ((self.window_width // 2) - 1) * self.block_size, ((self.window_height // 2)) * self.block_size
+        frame[pos_y : pos_y + 2 * self.block_size, pos_x : pos_x + 2 * self.block_size, :] = block_bot 
+        
+        # draw the window
+        if self.cfg.render_mode == "human":
+            pygame.draw.rect(
+                canvas, 
+                color_bot, 
+                pygame.Rect(
+                    pos_x, 
+                    pos_y,
+                    # hero occupties 2x2 blocks
+                    2 * self.block_size, 
+                    2 * self.block_size
+                )
             )
-        )
             
-        # The following line copies our drawings from `canvas` to the visible window
-        self.window.blit(canvas, canvas.get_rect())
-        pygame.event.pump()
-        pygame.display.update()
+            # The following line copies our drawings from `canvas` to the visible window
+            self.window.blit(canvas, canvas.get_rect())
+            pygame.event.pump()
+            pygame.display.update()
 
-        # We need to ensure that human-rendering occurs at the predefined framerate.
-        # The following line will automatically add a delay to keep the framerate stable.
-        self.clock.tick(self.metadata["render_fps"])
+            # We need to ensure that human-rendering occurs at the predefined framerate.
+            # The following line will automatically add a delay to keep the framerate stable.
+            self.clock.tick(self.metadata["render_fps"])
+        
+        return frame
     
     def _wait_for_game_state(self):
         while not len(self.game_client.state.bot_state) > 0:

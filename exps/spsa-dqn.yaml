@@ -15,10 +15,10 @@ eps_start: 0.9
 eps_end: 0.05
 eps_decay: 1000
 buffer_size: 10000
-num_episodes: 100
-
+num_episodes: 10
+max_train_steps: 200
 
 # evaluation
-render: True
-n_eval_episodes: 10
-pretrained_dir: outputs/2023-06-21/18-01-21/spsa_dqn_7ZEZW/
+n_eval_episodes: 1
+max_eval_steps: 1000
+eval_every_episodes: 2

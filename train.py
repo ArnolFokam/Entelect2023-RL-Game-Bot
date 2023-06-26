@@ -13,8 +13,13 @@ def main(cfg: DictConfig) -> None:
     wandb.config = omegaconf.OmegaConf.to_container(
         cfg, resolve=True, throw_on_missing=True
     )
-    wandb.init(entity=cfg.wandb.entity, project=cfg.wandb.project)
-    
+    wandb.init(project=cfg.project)
+    wandb.define_metric("episode")
+    wandb.run.define_metric("train-episode-reward", step_metric="episode", goal="maximize")
+    wandb.run.define_metric("eval-mean-reward", step_metric="episode", goal="maximize")
+    wandb.run.define_metric("eval-min-behaviour", step_metric="episode")
+    wandb.run.define_metric("eval-min-behaviour", step_metric="episode")
+
     env = environments[cfg.env_name](cfg=cfg)
     agent = agents[cfg.agent_name](env=env, cfg=cfg)
     

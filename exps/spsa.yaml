@@ -3,8 +3,12 @@ hydra:
     subdir: ${hydra.job.override_dirname}
 
 # experiment
-project: ECBot
+project: ECBOT
 
 
 # environment
 env_name: spsa
+render_mode: human
+
+# logging
+log_every_episodes: 2

@@ -4,10 +4,12 @@ import random
 from copy import deepcopy
 from itertools import count
 from collections import deque, namedtuple
+import numpy as np
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import wandb
 
 from ecbot.agents.base import BaseAgent
 from ecbot.agents.policy_nets import policy_nets
@@ -38,6 +40,8 @@ class DQN(BaseAgent):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         
+        self.steps_done = 0
+        
         self.policy_network = policy_nets[self.cfg.policy_net](
             num_actions=self.num_actions,
             observation_shape=self.observation_shape, 
@@ -56,17 +60,14 @@ class DQN(BaseAgent):
                 # found, so we pick action with the larger expected reward.
                 return self.act(state)
         else:
-            return torch.tensor([[self.env.action_space.sample()]], device=device, dtype=torch.long)
+            return torch.tensor([[self.env.action_space.sample()]], device=self.device, dtype=torch.long)
         
     def act(self, state):
         return self.policy_network(state).max(1)[1].view(1, 1)
     
     def learn(self):
-        self.steps_done = 0
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.policy_network = self.policy_network.to(device)
-        self.target_network = self.target_network.to(device)
-        
+        self.target_network = self.target_network.to(self.device)
+        self.policy_network = self.policy_network.to(self.device)      
         optimizer = optim.AdamW(self.policy_network.parameters(), lr=self.cfg.learning_rate, amsgrad=True)
         memory = ReplayMemory(self.cfg.buffer_size)
         
@@ -74,18 +75,21 @@ class DQN(BaseAgent):
             
             print(f"Starting {i_episode + 1}th episode")
             
-            state = self.env.reset()
-            state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
+            state, done = self.env.reset(), False
+            state = torch.tensor(state, dtype=torch.float32, device=self.device).unsqueeze(0)
+            ep_rewards = 0.0
             
-            for _ in count():
-                action = self._select_action(state, device)
+            for _ in range(self.cfg.max_train_steps):
+                action = self._select_action(state, self.device)
                 observation, reward, done, _ = self.env.step(action.item())
-                reward = torch.tensor([reward], device=device)
+                ep_rewards  += reward
+                reward = torch.tensor([reward], device=self.device)
+                self.env.render()
                 
                 if done:
                     next_state = None
                 else:
-                    next_state = torch.tensor(observation, dtype=torch.float32, device=device).unsqueeze(0)
+                    next_state = torch.tensor(observation, dtype=torch.float32, device=self.device).unsqueeze(0)
                     
                 # store the transition in mermory
                 memory.push(state, action, next_state, reward)
@@ -100,7 +104,7 @@ class DQN(BaseAgent):
                     
                     # Compute a mask of non-final states and concatenate the batch elements
                     # (a final state would've been the one after which simulation ended)
-                    non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, batch.next_state)), device=device, dtype=torch.bool)
+                    non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, batch.next_state)), device=self.device, dtype=torch.bool)
                     non_final_next_states = torch.cat([s for s in batch.next_state
                                                 if s is not None])
                     state_batch = torch.cat(batch.state)
@@ -117,7 +121,7 @@ class DQN(BaseAgent):
                     # on the "older" target_net; selecting their best reward with max(1)[0].
                     # This is merged based on the mask, such that we'll have either the expected
                     # state value or 0 in case the state was final.
-                    next_state_values = torch.zeros(self.cfg.batch_size, device=device)
+                    next_state_values = torch.zeros(self.cfg.batch_size, device=self.device)
                     with torch.no_grad():
                         next_state_values[non_final_mask] = self.target_network(non_final_next_states).max(1)[0]
                         
@@ -136,6 +140,11 @@ class DQN(BaseAgent):
                     torch.nn.utils.clip_grad_value_(self.policy_network.parameters(), 100)
                     optimizer.step()
                     
+                self.steps_done += 1
+                
+                if done:
+                    break
+                    
                 
                 # soft update of the q-network's weeights
                 target_network_weights = self.target_network.state_dict()
@@ -143,20 +152,24 @@ class DQN(BaseAgent):
                 for k in policy_network_weights:
                     target_network_weights[k] = policy_network_weights[k]*self.cfg.tau + target_network_weights[k]*(1 - self.cfg.tau)
                 self.target_network.load_state_dict(target_network_weights)
+            
+            if (i_episode + 1) % self.cfg.log_every_episodes:
+                wandb.log({"train-episode-reward": ep_rewards, "episode": i_episode + 1}, step=self.steps_done)
                 
-                if done:
-                    break
+            if (i_episode + 1) % self.cfg.eval_every_episodes:
+                mean_rwd, _, min_bv_frames, max_bv_frames = self.evaluate(return_frames=True)
+                min_bv_frames = np.rollaxis(min_bv_frames, -1, 1)
+                max_bv_frames = np.rollaxis(max_bv_frames, -1, 1)
+                
+                wandb.log({"eval-mean-reward": mean_rwd, "episode": i_episode + 1})
+                wandb.log({"eval-min-behaviour": wandb.Video(min_bv_frames, fps=self.env.metadata["render_fps"]), "episode": i_episode + 1})
+                wandb.log({"eval-max-behaviour": wandb.Video(max_bv_frames, fps=self.env.metadata["render_fps"]), "episode": i_episode + 1})
                 
     def save(self, dir):
         torch.save({
             "target_network": self.target_network.state_dict(),
             "cfg": self.cfg
         }, os.path.join(dir, "dqn.pt"))
-        
-    def to(self, device):
-        self.target_network = self.target_network.to(device)
-        self.policy_network = self.policy_network.to(device)
-        return self
         
             
             
