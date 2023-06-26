@@ -2,5 +2,9 @@ hydra:
   sweep:
     subdir: ${hydra.job.override_dirname}
 
+# experiment
+project: ECBot
+
+
 # environment
 env_name: spsa

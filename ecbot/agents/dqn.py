@@ -148,12 +148,9 @@ class DQN(BaseAgent):
                 
     def save(self, dir):
         torch.save({
-            "target_network": self.target_network.state_dict()
+            "target_network": self.target_network.state_dict(),
+            "cfg": self.cfg
         }, os.path.join(dir, "dqn.pt"))
-        
-    def load(self, dir):
-        self.policy_network.load_state_dict(torch.load(os.path.join(dir, "dqn.pt"))["target_network"])
-        self.target_network = deepcopy(self.policy_network)
         
     def to(self, device):
         self.target_network = self.target_network.to(device)

@@ -1,3 +1,5 @@
+from copy import deepcopy
+import os
 import numpy as np
 
 
@@ -40,11 +42,14 @@ def evaluate(agent, env, render, n_eval_episodes):
 
 @hydra.main(version_base=None)
 def main(cfg: DictConfig) -> None:
-    env = environments[cfg.env_name](cfg=cfg)
+    train_artificats = torch.load(os.path.join(dir, "dqn.pt"))
+    
+    env = environments[cfg.env_name](cfg=train_artificats["cfg"])
     agent = agents[cfg.agent_name](env=env, cfg=cfg)
     
     # Load the trained agent
-    agent.load(cfg.pretrained_dir)
+    agent.policy_network.load_state_dict(train_artificats["target_network"])
+    agent.target_network = deepcopy(agent.policy_network)
     
     mean_rewards, std_rewards = evaluate(agent, env, cfg.render, cfg.n_eval_episodes)
     print(f"Mean Rewards: {mean_rewards}, Std Rewards: {std_rewards}")
