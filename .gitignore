@@ -573,3 +573,4 @@ __pycache__/
 .vscode/
 outputs/
 wandb/
+runs/

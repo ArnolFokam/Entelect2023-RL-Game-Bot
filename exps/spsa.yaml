@@ -8,7 +8,7 @@ project: ECBOT
 
 # environment
 env_name: spsa
-render_mode: human
+render_mode:
 
 # logging
 log_every_episodes: 2

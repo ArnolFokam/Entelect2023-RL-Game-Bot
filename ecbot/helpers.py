@@ -3,7 +3,23 @@ import re
 import string
 import random
 import datetime
-from typing import List
+from typing import Any, Iterable, List
+
+
+def get_chunks(data: List[Any], chunck_num: int) -> Iterable[List[Any]]:
+    """
+    Divide list of elements into chuncks of `chunk_num` elements each
+    except the last chunk if the the total number of elements is not
+    divisible by `chunk_num`
+    Args:
+        data (List[Any]): list of elements
+        chunck_num (int): number of elements each chuck should contain
+    Returns:
+        Iterable[List[Any]]: generator chunks
+    """
+    for i in range(0, len(data), chunck_num):
+        yield data[i : i + chunck_num]
+
 
 def get_dir(*paths) -> str:
     """Creates a dir from a list of directories (like os.path.join), runs os.makedirs and returns the name
