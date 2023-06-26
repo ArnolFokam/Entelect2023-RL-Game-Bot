@@ -1,20 +1,26 @@
-import hydra
+import os
+import sys
 import wandb
+import hydra
+import omegaconf
 from omegaconf import DictConfig
 from hydra.core.hydra_config import HydraConfig
-import omegaconf
 
-from ecbot.envs import environments
+
 from ecbot.agents import agents
-from ecbot.helpers import generate_random_string, get_dir
+from ecbot.envs import environments
+from ecbot.helpers import generate_random_string, get_dir, get_new_run_dir_params, has_valid_hydra_dir_params
 
 @hydra.main(version_base=None)
 def main(cfg: DictConfig) -> None:
+    results_dir = get_dir(HydraConfig.get().runtime.output_dir)
+    wandb.init(project=cfg.project, name=os.path.basename(results_dir))
+    
+    # wandb stuffs
+    wandb.define_metric("episode")
     wandb.config = omegaconf.OmegaConf.to_container(
         cfg, resolve=True, throw_on_missing=True
     )
-    wandb.init(project=cfg.project)
-    wandb.define_metric("episode")
     wandb.run.define_metric("train-episode-reward", step_metric="episode", goal="maximize")
     wandb.run.define_metric("eval-mean-reward", step_metric="episode", goal="maximize")
     wandb.run.define_metric("eval-min-behaviour", step_metric="episode")
@@ -31,4 +37,10 @@ def main(cfg: DictConfig) -> None:
     agent.save(saved_agent_dir)
 
 if __name__ == "__main__":
-    main()
+    if has_valid_hydra_dir_params(sys.argv):
+        main()
+    else:
+        params = get_new_run_dir_params()
+        for param, value in params.items():
+            sys.argv.append(f"{param}={value}")
+        main()
