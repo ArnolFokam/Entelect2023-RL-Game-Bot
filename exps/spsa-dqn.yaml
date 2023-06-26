@@ -20,4 +20,5 @@ num_episodes: 100
 
 # evaluation
 render: True
-pretrained_dir: 
+n_eval_episodes: 10
+pretrained_dir: outputs/2023-06-21/18-01-21/spsa_dqn_7ZEZW/

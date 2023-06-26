@@ -54,13 +54,12 @@ class DQN(BaseAgent):
                 # t.max(1) will return the largest column value of each row.
                 # second column on max result is index of where max element was
                 # found, so we pick action with the larger expected reward.
-                return self.policy_network(state).max(1)[1].view(1, 1)
+                return self.act(state)
         else:
             return torch.tensor([[self.env.action_space.sample()]], device=device, dtype=torch.long)
         
-    def evaluate(self):
-        # TODO: write an evaluate function
-        pass
+    def act(self, state):
+        return self.policy_network(state).max(1)[1].view(1, 1)
     
     def learn(self):
         self.steps_done = 0
@@ -155,6 +154,11 @@ class DQN(BaseAgent):
     def load(self, dir):
         self.policy_network.load_state_dict(torch.load(os.path.join(dir, "dqn.pt"))["target_network"])
         self.target_network = deepcopy(self.policy_network)
+        
+    def to(self, device):
+        self.target_network = self.target_network.to(device)
+        self.policy_network = self.policy_network.to(device)
+        return self
         
             
             
