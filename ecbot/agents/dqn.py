@@ -131,6 +131,7 @@ class DQN(BaseAgent):
                      # Optimize the model
                     optimizer.zero_grad()
                     loss.backward()
+                    
                     # In-place gradient clipping
                     torch.nn.utils.clip_grad_value_(self.policy_network.parameters(), 100)
                     optimizer.step()
