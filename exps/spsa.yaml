@@ -9,7 +9,7 @@ project: ECBOT
 # environment
 env_name: spsa
 render_mode:
-past_reward_threshold: 0.0
+past_reward_threshold: -100000
 reward_backup_len: 100
 
 # logging
