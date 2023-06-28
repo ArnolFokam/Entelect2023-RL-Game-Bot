@@ -13,7 +13,7 @@ past_reward_threshold: -100000
 reward_backup_len: 100
 
 # logging
-log_every_episodes: 10
+log_every_episodes: 50
 
 # reward
 reward_fn: coins_on_platform
