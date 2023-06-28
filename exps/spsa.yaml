@@ -9,7 +9,7 @@ project: ECBOT
 # environment
 env_name: spsa
 render_mode: human
-past_reward_threshold: 0
+past_reward_threshold: 0.0
 reward_backup_len: 100
 
 # logging
@@ -18,7 +18,7 @@ log_every_episodes: 2
 # reward
 reward_fn: coins_on_platform
 step_bad_reward: -0.5
-on_floor_bad_reward: -2
+on_floor_bad_reward: -3
 coin_difference_reward_multiplier: 4
 initial_position_reward: 2
 position_reward_decay_factor: 0.5
