@@ -8,7 +8,7 @@ from ecbot.connection import CiFyClient
 class CyFi(gym.Env):
     metadata = {
         "render_modes": ["human"], 
-        "render_fps": 4,
+        "render_fps": 2,
     }
     
     cellToColor = {

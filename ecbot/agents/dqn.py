@@ -153,18 +153,26 @@ class DQN(BaseAgent):
                     target_network_weights[k] = policy_network_weights[k]*self.cfg.tau + target_network_weights[k]*(1 - self.cfg.tau)
                 self.target_network.load_state_dict(target_network_weights)
             
-            if (i_episode + 1) % self.cfg.log_every_episodes:
+            logs={}
+            if (i_episode + 1) % self.cfg.log_every_episodes == 0:
+                logs["train-episode-reward"] = ep_rewards
                 wandb.log({"train-episode-reward": ep_rewards, "episode": i_episode + 1}, step=self.steps_done)
                 
-            if (i_episode + 1) % self.cfg.eval_every_episodes:
+            if (i_episode + 1) % self.cfg.eval_every_episodes == 0:
                 mean_rwd, _, min_bv_frames, max_bv_frames = self.evaluate(return_frames=True)
                 min_bv_frames = np.rollaxis(min_bv_frames, -1, 1)
                 max_bv_frames = np.rollaxis(max_bv_frames, -1, 1)
                 
-                wandb.log({"eval-mean-reward": mean_rwd, "episode": i_episode + 1})
-                wandb.log({"eval-min-behaviour": wandb.Video(min_bv_frames, fps=self.env.metadata["render_fps"]), "episode": i_episode + 1})
-                wandb.log({"eval-max-behaviour": wandb.Video(max_bv_frames, fps=self.env.metadata["render_fps"]), "episode": i_episode + 1})
+                logs["eval-mean-reward"] = mean_rwd
+                logs["eval-min-behaviour"] = wandb.Video(min_bv_frames, fps=self.env.metadata["render_fps"])
+                logs["eval-max-behaviour"] = wandb.Video(max_bv_frames, fps=self.env.metadata["render_fps"])
                 
+            if len(logs) > 0:
+                wandb.log({
+                    **logs,
+                    "episode": i_episode + 1
+                }, step=self.steps_done)
+            
     def save(self, dir):
         torch.save({
             "target_network": self.target_network.state_dict(),
