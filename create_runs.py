@@ -147,9 +147,9 @@ def main(
 cd {ROOT_DIR}
 {f"source ~/anaconda3/etc/profile.d/conda.sh && conda activate {CONDA_ENV_NAME}" if  computer == SLURM else ""}
 {f"source /apps/chpc/chem/anaconda3-2021.11/etc/profile.d/conda.sh" if  computer == CHPC else ""}
-{f"conda activate {CONDA_HOME}/envs/{CONDA_ENV_NAME}" if  computer == CHPC or computer == LOCAL else ""}
+{f"conda activate {CONDA_HOME}/envs/{CONDA_ENV_NAME}" if  computer == CHPC else ""}
 {bsh_cmd}
-{"conda deactivate"}
+{"conda deactivate" if computer == CHPC or computer == SLURM else ""}
 """
 # {f"#PBS -M fokammanuel1@students.wits.ac.za" if  computer == CHPC else ""}
 # {f"#PBS -m abe" if  computer == CHPC else ""}

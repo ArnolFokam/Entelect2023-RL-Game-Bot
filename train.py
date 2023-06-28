@@ -14,13 +14,16 @@ from ecbot.helpers import generate_random_string, get_dir, get_new_run_dir_param
 @hydra.main(version_base=None)
 def main(cfg: DictConfig) -> None:
     results_dir = get_dir(HydraConfig.get().runtime.output_dir)
-    wandb.init(project=cfg.project, name=os.path.basename(results_dir))
+    wandb.init(
+        project=cfg.project,
+        name=os.path.basename(results_dir),
+        config=omegaconf.OmegaConf.to_container(
+            cfg, resolve=True, throw_on_missing=True
+        )
+    )
     
     # wandb stuffs
     wandb.define_metric("episode")
-    wandb.config = omegaconf.OmegaConf.to_container(
-        cfg, resolve=True, throw_on_missing=True
-    )
     wandb.run.define_metric("train-episode-reward", step_metric="episode", goal="maximize")
     wandb.run.define_metric("eval-mean-reward", step_metric="episode", goal="maximize")
     wandb.run.define_metric("eval-min-behaviour", step_metric="episode")
