@@ -4,6 +4,6 @@ batch_size:
   - 256
 
 num_episodes:
-  - 500
+  - 3000
 
   
