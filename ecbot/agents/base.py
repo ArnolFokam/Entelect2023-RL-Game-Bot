@@ -60,10 +60,11 @@ class BaseAgent:
             episodes_rewards.append(episode_reward)
             
             if return_frames:
+                frames = np.array(frames)
                 episodes_frames.append(frames)
+                
             
         episodes_rewards = np.array(episodes_rewards)
-        episodes_frames = np.array(episodes_frames)
         
         if return_frames:
             min_behaviour_frame = episodes_frames[np.argmin(episodes_rewards)]

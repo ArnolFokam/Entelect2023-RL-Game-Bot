@@ -13,12 +13,12 @@ tau: 0.9996
 gamma: 0.99
 eps_start: 0.9
 eps_end: 0.05
-eps_decay: 1000
+eps_decay: 100000
 buffer_size: 10000
-num_episodes: 10
+num_episodes: 100
 max_train_steps: 200
 
 # evaluation
-n_eval_episodes: 1
+n_eval_episodes: 10
 max_eval_steps: 1000
 eval_every_episodes: 2

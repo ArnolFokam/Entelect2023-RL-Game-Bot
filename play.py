@@ -67,7 +67,7 @@ def play(cfg: DictConfig) -> None:
             # action = env.action_space.sample()
             _, _, done, _ = env.step(supported_input)
         
-        env.render(mode="human")
+        env.render()
         
     print("Game Completed!")
 

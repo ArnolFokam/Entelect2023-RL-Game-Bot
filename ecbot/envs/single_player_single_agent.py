@@ -1,11 +1,12 @@
 import numpy as np
-from collections import defaultdict, deque
+from collections import deque
 
 import gym
 from gym import spaces
 
 from ecbot.connection import Constants
 from ecbot.envs.cyfi import CyFi
+from ecbot.envs.rewards import reward_fn
 
 class SinglePlayerSingleAgentEnv(CyFi):
     
@@ -32,21 +33,10 @@ class SinglePlayerSingleAgentEnv(CyFi):
         # Note: the agent is at the center of the window
         self.observation_space = spaces.Box(low=0, high=6, shape=(34 * 22,), dtype=int)
         
-        # to calculate reward
-        self.decay_factor = 0.3
-        self.reward_backup_len = 15
-        self.past_reward_threshold = 0.01
-        self.position_reward = defaultdict(lambda : 10)
-        self.past_k_rewards = deque([], maxlen=self.reward_backup_len) 
-        
-    def _calculate_reward(self, position, *args, **kwargs):
-        reward = self.position_reward[position]
-        
-        # decay the reward
-        self.position_reward[position] = reward * self.decay_factor
-        
-        return reward
-        
+        self.reward_fn = reward_fn[cfg.reward_fn](cfg)
+        self.past_k_rewards = deque([], maxlen=self.cfg.reward_backup_len) 
+
+
     def step(self, action: int):
         
         # command from the  game server are 1-indexed
@@ -54,16 +44,17 @@ class SinglePlayerSingleAgentEnv(CyFi):
         self._wait_for_game_state()
         
         self.observation, self.info, done = self._return_env_state()
-        reward = self._calculate_reward(self.info["position"])
+        reward = self.reward_fn(self.info)
         
         self.past_k_rewards.append(reward)
-        done = done or np.mean(self.past_k_rewards) < self.past_reward_threshold
+        print(f"reward: {reward}, mean: {np.mean(self.past_k_rewards)}")
+        done = done or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
         return self.observation, reward, done, self.info
     
     def reset(self):
         observation = super().reset()
-        self.past_k_rewards = deque([], maxlen=self.reward_backup_len) 
-        self.position_reward = defaultdict(lambda : 10)
+        self.past_k_rewards = deque([], maxlen=self.cfg.reward_backup_len)
+        self.reward_fn.reset(self.info)
         return observation
         
     def _get_observation(self, game_state):
