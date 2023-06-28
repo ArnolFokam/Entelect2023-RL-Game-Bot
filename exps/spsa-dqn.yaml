@@ -20,5 +20,5 @@ max_train_steps: 50
 
 # evaluation
 n_eval_episodes: 10
-max_eval_steps: 1000
+max_eval_steps: 50
 eval_every_episodes: 25
