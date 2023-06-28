@@ -8,7 +8,7 @@ project: ECBOT
 
 # environment
 env_name: spsa
-render_mode: human
+render_mode:
 past_reward_threshold: 0.0
 reward_backup_len: 100
 
