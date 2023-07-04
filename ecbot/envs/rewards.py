@@ -8,26 +8,38 @@ class GetNewCoinsOnPlatform:
         self.cfg = cfg
         self.last_collected = 0
         
-        assert self.cfg.step_bad_reward <= 0.0
-        assert self.cfg.on_floor_bad_reward < 0.0
+        assert self.cfg.step_penalty <= 0.0
+        assert self.cfg.on_bad_floor_penalty <= 0.0
+        assert self.cfg.on_good_floor_reward >= 0.0
         
         # to calculate reward
         self.position_reward = defaultdict(lambda : self.cfg.initial_position_reward)
         
     def __call__(self, info) -> Any:
         # negative step reward
-        reward = self.cfg.step_bad_reward
+        reward = self.cfg.step_penalty
         
-        # reward for collection
-        reward += (info["collected"] - self.last_collected) * self.cfg.coin_difference_reward_multiplier
+        # -/+ ve reward for collection or lost
+        coin_difference = info["collected"] - self.last_collected
+        
+        if coin_difference > 0:
+            reward += coin_difference * self.cfg.more_coin_reward_multiplier
+        else:
+            reward += coin_difference * self.cfg.less_coin_penalty_multiplier
+            
         self.last_collected = info["collected"]
         
-        # reward for not moving on the platform
+        # get floor position of agent
         pos_x, pos_y = ((CyFi.window_width // 2) - 1), ((CyFi.window_height // 2))
         floor = info["window"][pos_y + 2:pos_y + 3, pos_x:pos_x + 2][0]
         
-        if floor[0] == 1 or floor[1] == 1:
-            reward += self.cfg.on_floor_bad_reward
+        # penalize for being on a bad floor
+        if floor[0] in self.cfg.bad_floors or floor[1] in self.cfg.bad_floors:
+            reward += self.cfg.on_bad_floor_penalty
+        
+        # reward for being on a good floor
+        if floor[0] in self.cfg.bad_floors or floor[1] in self.cfg.bad_floors:
+            reward += self.cfg.on_good_floor_reward
             
         position = info["position"]
         reward += self.position_reward[position]

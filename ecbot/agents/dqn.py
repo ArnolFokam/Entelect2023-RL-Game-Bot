@@ -12,7 +12,7 @@ import torch.optim as optim
 import wandb
 
 from ecbot.agents.base import BaseAgent
-from ecbot.agents.policy_nets import policy_nets
+from ecbot.agents.function_approximators import function_approximators
 
 
 Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
@@ -42,9 +42,9 @@ class DQN(BaseAgent):
         
         self.steps_done = 0
         
-        self.policy_network = policy_nets[self.cfg.policy_net](
-            num_actions=self.num_actions,
-            observation_shape=self.observation_shape, 
+        self.policy_network = function_approximators[self.cfg.q_approximator](
+            input_shape=self.observation_shape,
+            output_shape=(self.num_actions,), 
             hidden_dim=self.cfg.hidden_dim,
             num_hidden_layers=self.cfg.num_hidden_layers
         )
@@ -82,7 +82,6 @@ class DQN(BaseAgent):
             for _ in range(self.cfg.max_train_steps):
                 action = self._select_action(state, self.device)
                 observation, reward, done, _ = self.env.step(action.item())
-                ep_rewards  += reward
                 reward = torch.tensor([reward], device=self.device)
                 self.env.render()
                 
@@ -94,8 +93,9 @@ class DQN(BaseAgent):
                 # store the transition in mermory
                 memory.push(state, action, next_state, reward)
                 
-                #move to the next state
+                # move to the next state
                 state = next_state
+                ep_rewards  += reward
                 
                 # perform one step of the optimization (on the policy network)
                 if len(memory) >= self.cfg.batch_size:
