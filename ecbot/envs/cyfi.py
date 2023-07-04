@@ -33,7 +33,7 @@ class CyFi(gym.Env):
         self.cfg = cfg
         
         # initialise the game client
-        self.game_client = CiFyClient()
+        self.game_client = CiFyClient(port=self.cfg.server_port)
         
         # window and clock rate for 
         # the defined rendering modes

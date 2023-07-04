@@ -35,7 +35,7 @@ class State:
 class CiFyClient:
     
     
-    def __init__(self, max_frames: Optional[int] = 10) -> None:
+    def __init__(self, port: int = 5000, max_frames: Optional[int] = 10) -> None:
         # Configuration
         runner_ip = os.getenv("RUNNER_IPV4") or "localhost"
         runner_ip = runner_ip if runner_ip.startswith("http://") else f"http://{runner_ip}"
@@ -43,7 +43,7 @@ class CiFyClient:
         # Build SignalR connection to Runner Hub
         self.connection = (
             HubConnectionBuilder()
-            .with_url(f"{runner_ip}:5000/runnerhub")
+            .with_url(f"{runner_ip}:{port}/runnerhub")
             .configure_logging(LogLevel.ERROR)
             .with_automatic_reconnect(
                 {

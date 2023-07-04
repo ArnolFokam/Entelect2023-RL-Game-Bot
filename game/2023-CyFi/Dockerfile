@@ -17,4 +17,4 @@ COPY --from=build /app/publish .
 
 EXPOSE 5000
 
-CMD ["dotnet", "CyFi.dll"]
+CMD ["dotnet", "CyFi.dll", "5000"]

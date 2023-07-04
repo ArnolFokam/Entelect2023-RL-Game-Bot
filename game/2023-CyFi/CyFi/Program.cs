@@ -58,6 +58,10 @@ namespace CyFi
             CloudCallbackFactory cloudCallbackFactory = new(appSettings);
             CloudIntegrationService cloudIntegrationService = new(appSettings, cloudLog, cloudCallbackFactory);
 
+            // build the url from the ip (specified in the config) and port (specified by command line args)
+            String ip = configuration["SignalR:RunnerIP"];
+            String runnerUrl = "http://" + ip + ":" + args[0];
+
             using (LogContext.PushProperty("ConsoleOnly", value: true))
             {
                 IHost? host = default;
@@ -84,7 +88,7 @@ namespace CyFi
                         })
                         .ConfigureWebHostDefaults((webBuilder) =>
                         {
-                            webBuilder.UseUrls("http://*:5000");
+                            webBuilder.UseUrls(runnerUrl);
                             webBuilder.Configure((app) =>
                             {
                                 app.UseRouting();
@@ -100,9 +104,9 @@ namespace CyFi
 
                     var signalRConfig = configuration.GetSection("SignalR").GetChildren().ToDictionary(x => x.Key, x => x.Value);
 
-                    var connection = new HubConnectionBuilder().WithUrl(signalRConfig["RunnerURL"]).Build();
+                    var connection = new HubConnectionBuilder().WithUrl(runnerUrl + "/runnerhub").Build();
 
-                    Console.WriteLine($"SignalR Config{signalRConfig["RunnerURL"]}");
+                    Console.WriteLine($"SignalR Config{runnerUrl + "/runnerhub"}");
 
                     connection.StartAsync();
 
