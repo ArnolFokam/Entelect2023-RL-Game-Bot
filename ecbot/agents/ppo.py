@@ -187,9 +187,10 @@ class PPO(BaseAgent):
             
     def save(self, dir):
         torch.save({
-            "target_network": self.target_network.state_dict(),
+            "actor_network": self.actor_network.state_dict(),
+            "critic_network": self.critic_network.state_dict(),
             "cfg": self.cfg
-        }, os.path.join(dir, "dqn.pt"))
+        }, os.path.join(dir, "critic.pt"))
         
             
             
