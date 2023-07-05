@@ -6,9 +6,9 @@ defaults:
 agent_name: dqn
 q_approximator: mlp
 learning_rate: 1e-4
-batch_size: 32
+batch_size: 64
 tau: 0.9996
 eps_start: 0.9
 eps_end: 0.05
-eps_decay: 100000
+eps_decay: 16500
 buffer_size: 10000

@@ -17,12 +17,12 @@ past_reward_threshold: -100000
 reward_backup_len: 100
 
 # agent
-gamma: 0.99
-max_train_steps: 20
-num_episodes: 20
+gamma: 0.9997
+max_train_steps: 200
+num_episodes: 500
 
 # logging
-log_every_episodes: 50
+log_every_episodes: 25
 
 # reward
 reward_fn: coins_on_platform
@@ -45,13 +45,13 @@ good_floors:
 bad_floors:
   - 1
 
-position_reward_decay_factor: 0.0
+position_reward_decay_factor: 0.5
 
 # reward_fn: new_position
 # position_reward_decay_factor: 0.3
 # initial_position_reward: 10
 
 # evaluation
-n_eval_episodes: 2
-max_eval_steps: 10
-eval_every_episodes: 2
+n_eval_episodes: 10
+max_eval_steps: 100
+eval_every_episodes: 100
