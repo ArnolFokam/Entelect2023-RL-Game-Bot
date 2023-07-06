@@ -35,7 +35,7 @@ less_coin_penalty_multiplier: 4
 # penalties
 on_good_floor_reward: 1
 more_coin_reward_multiplier: 8
-initial_position_reward: 1
+initial_position_reward: 0
 
 # others
 good_floors:
@@ -45,7 +45,7 @@ good_floors:
 bad_floors:
   - 1
 
-position_reward_decay_factor: 0.5
+position_reward_decay_factor: 0.0
 
 # reward_fn: new_position
 # position_reward_decay_factor: 0.3
