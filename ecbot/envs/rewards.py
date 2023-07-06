@@ -38,7 +38,7 @@ class GetNewCoinsOnPlatform:
             reward += self.cfg.on_bad_floor_penalty
         
         # reward for being on a good floor
-        if floor[0] in self.cfg.bad_floors or floor[1] in self.cfg.bad_floors:
+        if floor[0] in self.cfg.good_floors or floor[1] in self.cfg.good_floors:
             reward += self.cfg.on_good_floor_reward
             
         position = info["position"]
