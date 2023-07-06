@@ -7,8 +7,8 @@ project: ECBOT
 
 # server
 server_port: 5000
-num_hidden_layers: 3
-hidden_dim: 64
+num_hidden_layers: 2
+hidden_dim: 128
 
 # environment
 env_name: spsa
@@ -18,11 +18,11 @@ reward_backup_len: 100
 
 # agent
 gamma: 0.9997
-max_train_steps: 200
-num_episodes: 500
+max_train_steps: 100
+num_episodes: 200
 
 # logging
-log_every_episodes: 25
+log_every_episodes: 5
 
 # reward
 reward_fn: coins_on_platform
@@ -33,7 +33,7 @@ on_bad_floor_penalty: -10.0
 less_coin_penalty_multiplier: 4
 
 # penalties
-on_good_floor_reward: 2
+on_good_floor_reward: 1
 more_coin_reward_multiplier: 8
 initial_position_reward: 1
 
@@ -52,6 +52,6 @@ position_reward_decay_factor: 0.5
 # initial_position_reward: 10
 
 # evaluation
-n_eval_episodes: 10
-max_eval_steps: 75
-eval_every_episodes: 100
+n_eval_episodes: 2
+max_eval_steps: 100
+eval_every_episodes: 40
