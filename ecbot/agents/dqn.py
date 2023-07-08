@@ -83,7 +83,10 @@ class DQN(BaseAgent):
                 action = self._select_action(state, self.device)
                 observation, reward, done, _ = self.env.step(action.item())
                 reward = torch.tensor([reward], device=self.device)
-                self.env.render()
+                
+                # training viz
+                frame = self.env.render()
+                self.env.send_frame_to_socket_server(frame)
                 
                 if done:
                     next_state = None

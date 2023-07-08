@@ -14,9 +14,11 @@ from ecbot.helpers import generate_random_string, get_dir, get_new_run_dir_param
 @hydra.main(version_base=None)
 def main(cfg: DictConfig) -> None:
     results_dir = get_dir(HydraConfig.get().runtime.output_dir)
+    run_name = os.path.basename(results_dir)
+    
     wandb.init(
         project=cfg.project,
-        name=os.path.basename(results_dir),
+        name=run_name,
         config=omegaconf.OmegaConf.to_container(
             cfg, resolve=True, throw_on_missing=True
         )
@@ -29,7 +31,7 @@ def main(cfg: DictConfig) -> None:
     wandb.run.define_metric("eval-min-behaviour", step_metric="episode")
     wandb.run.define_metric("eval-min-behaviour", step_metric="episode")
 
-    env = environments[cfg.env_name](cfg=cfg)
+    env = environments[cfg.env_name](cfg=cfg, run=run_name)
     agent = agents[cfg.agent_name](env=env, cfg=cfg)
     
     # train agent

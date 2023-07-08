@@ -10,9 +10,9 @@ from ecbot.envs.rewards import reward_fn
 
 class SinglePlayerSingleAgentEnv(CyFi):
     
-    def __init__(self, cfg):
+    def __init__(self, *args, **kwargs):
 
-        super().__init__(cfg)
+        super().__init__(*args, **kwargs)
         
         # Our CiFy agent has 12 possible actions
         # UP - 1
@@ -33,7 +33,7 @@ class SinglePlayerSingleAgentEnv(CyFi):
         # Note: the agent is at the center of the window
         self.observation_space = spaces.Box(low=0, high=6, shape=(34 * 22,), dtype=int)
         
-        self.reward_fn = reward_fn[cfg.reward_fn](cfg)
+        self.reward_fn = reward_fn[self.cfg.reward_fn](self.cfg)
         self.past_k_rewards = deque([], maxlen=self.cfg.reward_backup_len) 
 
 

@@ -28,11 +28,14 @@ class CyFi(gym.Env):
     window_width = 34 # must be equal to the width of the window as defined in the hero window
     block_size = 16 # block size per cell in the hero window
     
-    def __init__(self, cfg) -> None:
+    def __init__(self, cfg, run) -> None:
         assert cfg.render_mode is None or cfg.render_mode in self.metadata["render_modes"]
         
         # save configurations
         self.cfg = cfg
+        
+        # save run name
+        self.run = run
         
         # initialise the game client
         self.game_client = CiFyClient(port=self.cfg.game_server_port)
@@ -138,9 +141,6 @@ class CyFi(gym.Env):
             # The following line will automatically add a delay to keep the framerate stable.
             self.clock.tick(self.metadata["render_fps"])
         
-        if self.socket_connected:
-            self.sio.emit("new_frame", {"frame": array_to_bytes(frame)})
-        
         return frame
     
     def setup_socket(self):
@@ -163,6 +163,12 @@ class CyFi(gym.Env):
             
         self.sio.connect(f'http://localhost:{self.cfg.viz_server_port}')
     
+    def send_frame_to_socket_server(self, frame):
+        if self.socket_connected:
+            self.sio.emit("new_frame", {
+                "frame": array_to_bytes(frame),
+                "run": self.run
+            })
     
     def _wait_for_game_state(self):
         while not len(self.game_client.state.bot_state) > 0:
