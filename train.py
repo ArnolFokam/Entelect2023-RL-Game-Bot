@@ -2,7 +2,10 @@ import os
 import sys
 import wandb
 import hydra
+import torch
+import random
 import omegaconf
+import numpy as np
 from omegaconf import DictConfig
 from hydra.core.hydra_config import HydraConfig
 
@@ -15,6 +18,17 @@ from ecbot.helpers import generate_random_string, get_dir, get_new_run_dir_param
 def main(cfg: DictConfig) -> None:
     results_dir = get_dir(HydraConfig.get().runtime.output_dir)
     run_name = os.path.basename(results_dir)
+    
+    # ensure reprodcibility and speed up
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(cfg.seed)
+        
+    os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
+    torch.use_deterministic_algorithms(True)
+    torch.backends.cudnn.benchmark = True
+    torch.manual_seed(cfg.seed)
+    random.seed(cfg.seed)
+    np.random.seed(cfg.seed)
     
     wandb.init(
         project=cfg.project,

@@ -19,6 +19,8 @@ class GetNewCoinsOnPlatform:
         # negative step reward
         reward = self.cfg.step_penalty
         
+        was_on_bad_floor = False
+        
         # -/+ ve reward for collection or lost
         coin_difference = info["collected"] - self.last_collected
         
@@ -36,6 +38,7 @@ class GetNewCoinsOnPlatform:
         # penalize for being on a bad floor
         if floor[0] in self.cfg.bad_floors or floor[1] in self.cfg.bad_floors:
             reward += self.cfg.on_bad_floor_penalty
+            was_on_bad_floor = True
         
         # reward for being on a good floor
         if floor[0] in self.cfg.good_floors or floor[1] in self.cfg.good_floors:
@@ -47,7 +50,7 @@ class GetNewCoinsOnPlatform:
         # decay the reward
         self.position_reward[position] = reward * self.cfg.position_reward_decay_factor
         
-        return reward
+        return reward, was_on_bad_floor
         
     
     def reset(self, info):
