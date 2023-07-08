@@ -16,6 +16,8 @@ def on_new_frame(data):
     frames.append((run, bytes_to_array(frame_buffer)))
     
 if __name__ == "__main__":
+    
+    assert len(sys.argv) == 3
 
     # initialize pygame on environment manually
     pygame.init()
