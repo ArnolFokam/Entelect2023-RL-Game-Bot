@@ -27,6 +27,8 @@ def main(cfg: DictConfig) -> None:
     # wandb stuffs
     wandb.define_metric("episode")
     wandb.run.define_metric("train-episode-reward", step_metric="episode", goal="maximize")
+    wandb.run.define_metric("train-actor-loss", step_metric="episode", goal="minimize")
+    wandb.run.define_metric("train-critic-loss", step_metric="episode", goal="minimize")
     wandb.run.define_metric("eval-mean-reward", step_metric="episode", goal="maximize")
     wandb.run.define_metric("eval-min-behaviour", step_metric="episode")
     wandb.run.define_metric("eval-min-behaviour", step_metric="episode")

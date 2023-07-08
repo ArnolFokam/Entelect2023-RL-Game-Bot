@@ -74,7 +74,7 @@ class PPO(BaseAgent):
             print(f"Starting {i_episode + 1}th episode")
             
             # perform a rollout
-            state, _ = self.env.reset(), False
+            state = self.env.reset()
             ep_rewards = 0.0
             
             states = []
@@ -107,6 +107,8 @@ class PPO(BaseAgent):
                 # move to the next state
                 state = next_state
                 ep_rewards += reward
+                
+                self.steps_done += 1
                 
                 if done:
                     break
@@ -171,7 +173,6 @@ class PPO(BaseAgent):
                 logs["train-episode-reward"] = ep_rewards
                 logs["train-actor-loss"] = np.mean(actor_loss)
                 logs["train-critic-loss"] = np.mean(critic_loss)
-                wandb.log({"train-episode-reward": ep_rewards, "episode": i_episode + 1}, step=self.steps_done)
                 
             if (i_episode + 1) % self.cfg.eval_every_episodes == 0:
                 mean_rwd, _, min_bv_frames, max_bv_frames = self.evaluate(return_frames=True)

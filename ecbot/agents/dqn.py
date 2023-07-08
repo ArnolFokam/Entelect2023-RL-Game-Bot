@@ -50,7 +50,7 @@ class DQN(BaseAgent):
         )
         self.target_network = deepcopy(self.policy_network)
         
-    def _select_action(self, state, device):
+    def _select_action(self, state):
         sample = random.random()
         eps_threshold = self.cfg.eps_end + (self.cfg.eps_start - self.cfg.eps_end) * math.exp(-1. * self.steps_done / self.cfg.eps_decay)
         if sample > eps_threshold:
@@ -80,7 +80,7 @@ class DQN(BaseAgent):
             ep_rewards = 0.0
             
             for _ in range(self.cfg.max_train_steps):
-                action = self._select_action(state, self.device)
+                action = self._select_action(state)
                 observation, reward, done, _ = self.env.step(action.item())
                 reward = torch.tensor([reward], device=self.device)
                 
@@ -159,7 +159,6 @@ class DQN(BaseAgent):
             logs={}
             if (i_episode + 1) % self.cfg.log_every_episodes == 0:
                 logs["train-episode-reward"] = ep_rewards
-                wandb.log({"train-episode-reward": ep_rewards, "episode": i_episode + 1}, step=self.steps_done)
                 
             if (i_episode + 1) % self.cfg.eval_every_episodes == 0:
                 mean_rwd, _, min_bv_frames, max_bv_frames = self.evaluate(return_frames=True)
