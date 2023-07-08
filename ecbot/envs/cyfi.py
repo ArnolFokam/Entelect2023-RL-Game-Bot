@@ -27,7 +27,7 @@ class CyFi(gym.Env):
     window_width = 34 # must be equal to the width of the window as defined in the hero window
     block_size = 16 # block size per cell in the hero window
     
-    def __init__(self, cfg) -> None:
+    async def __init__(self, cfg) -> None:
         assert cfg.render_mode is None or cfg.render_mode in self.metadata["render_modes"]
         
         # save configurations
@@ -42,9 +42,9 @@ class CyFi(gym.Env):
         self.clock = None
         
         self.sio = socketio.AsyncClient()
-        self.sio.connect(f'http://localhost:{self.cfg.viz_server_port}')
+        await self.sio.connect(f'http://localhost:{self.cfg.viz_server_port}')
             
-    def render(self):
+    async def render(self):
         """Rendering done only through PyGame"""
         
         frame = np.full(
@@ -135,7 +135,7 @@ class CyFi(gym.Env):
             # The following line will automatically add a delay to keep the framerate stable.
             self.clock.tick(self.metadata["render_fps"])
         
-        self.sio.emit("new_frame", frame.tolist())
+        await self.sio.emit("new_frame", frame.tolist())
         
         return frame
     
