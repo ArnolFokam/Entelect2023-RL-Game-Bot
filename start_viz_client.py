@@ -1,12 +1,15 @@
 import sys
 import socketio
 
-sio = socketio.AsyncClient()
+import numpy as np
+
+sio = socketio.Client()
 
 @sio.event
-async def on_new_frame(data):
-    print(data)
+def on_new_frame(data):
+    frame_buffer = data["frame"]
+    frame = np.frombuffer(frame_buffer)
+    print(frame)
     
 if __name__ == "__main__":
     sio.connect(f'http://localhost:{sys.argv[1]}')
-    sio.emit("new_frame", {"yo": "yo"})

@@ -1,10 +1,21 @@
+from io import BytesIO
 import os
 import re
 import string
 import random
 import datetime
+import numpy as np
 from typing import Any, Iterable, List
 
+def array_to_bytes(x: np.ndarray) -> bytes:
+    np_bytes = BytesIO()
+    np.save(np_bytes, x, allow_pickle=True)
+    return np_bytes.getvalue()
+
+
+def bytes_to_array(b: bytes) -> np.ndarray:
+    np_bytes = BytesIO(b)
+    return np.load(np_bytes, allow_pickle=True)
 
 def get_chunks(data: List[Any], chunck_num: int) -> Iterable[List[Any]]:
     """
