@@ -27,7 +27,7 @@ class CyFi(gym.Env):
     window_width = 34 # must be equal to the width of the window as defined in the hero window
     block_size = 16 # block size per cell in the hero window
     
-    async def __init__(self, cfg) -> None:
+    def __init__(self, cfg) -> None:
         assert cfg.render_mode is None or cfg.render_mode in self.metadata["render_modes"]
         
         # save configurations
@@ -41,11 +41,12 @@ class CyFi(gym.Env):
         self.window = None
         self.clock = None
         
+        self.sio = None
+        self.socket_connected = False
         
-        self.sio = socketio.AsyncClient()
-        await self.sio.connect(f'http://localhost:{self.cfg.viz_server_port}')
+        self.setup_socket()
             
-    async def render(self):
+    def render(self):
         """Rendering done only through PyGame"""
         
         frame = np.full(
@@ -136,9 +137,31 @@ class CyFi(gym.Env):
             # The following line will automatically add a delay to keep the framerate stable.
             self.clock.tick(self.metadata["render_fps"])
         
-        await self.sio.emit("new_frame", frame.tolist())
+        if self.socket_connected:
+            self.sio.emit("new_frame", {"frame": frame.tobytes()})
         
         return frame
+    
+    def setup_socket(self):
+        self.sio = socketio.Client()
+        
+        @self.sio.event
+        def connect():
+            print('[INFO] Connected to server.')
+            self.socket_connected = True
+        
+        @self.sio.event
+        def disconnect():
+            print('[INFO] Disconnected from server.')
+            self.socket_connected = False
+            
+        @self.sio.event
+        def connect_error():
+            print('[INFO] Failed to connect to server.')
+            self.socket_connected = False
+            
+        self.sio.connect(f'http://localhost:{self.cfg.viz_server_port}')
+    
     
     def _wait_for_game_state(self):
         while not len(self.game_client.state.bot_state) > 0:

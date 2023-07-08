@@ -3,7 +3,7 @@ hydra:
     subdir: ${hydra.job.override_dirname}
 
 # experiment
-project: ECBOT
+project: ECBOT-test
 
 # servers
 game_server_port: 5000
