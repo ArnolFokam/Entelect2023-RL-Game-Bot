@@ -1,7 +1,7 @@
 import sys
 import socketio
 
-sio = socketio.AsyncClient()
+sio = socketio.Client()
 
 @sio.event
 def on_new_frame(data):

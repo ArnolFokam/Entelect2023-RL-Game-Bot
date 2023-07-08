@@ -2,6 +2,7 @@ import numpy as np
 
 import gym
 import pygame
+import socketio
 
 from ecbot.connection import CiFyClient
 
@@ -33,12 +34,15 @@ class CyFi(gym.Env):
         self.cfg = cfg
         
         # initialise the game client
-        self.game_client = CiFyClient(port=self.cfg.server_port)
+        self.game_client = CiFyClient(port=self.cfg.game_server_port)
         
         # window and clock rate for 
         # the defined rendering modes
         self.window = None
         self.clock = None
+        
+        self.sio = socketio.AsyncClient()
+        self.sio.connect(f'http://localhost:{self.cfg.viz_server_port}')
             
     def render(self):
         """Rendering done only through PyGame"""
@@ -130,6 +134,8 @@ class CyFi(gym.Env):
             # We need to ensure that human-rendering occurs at the predefined framerate.
             # The following line will automatically add a delay to keep the framerate stable.
             self.clock.tick(self.metadata["render_fps"])
+        
+        self.sio.emit("new_frame", frame.tolist())
         
         return frame
     

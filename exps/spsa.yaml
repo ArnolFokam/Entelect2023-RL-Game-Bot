@@ -5,8 +5,11 @@ hydra:
 # experiment
 project: ECBOT
 
-# server
-server_port: 5000
+# servers
+game_server_port: 5000
+viz_server_port: 6000
+
+# architecture
 num_hidden_layers: 2
 hidden_dim: 128
 
