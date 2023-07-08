@@ -41,6 +41,7 @@ class CyFi(gym.Env):
         self.window = None
         self.clock = None
         
+        
         self.sio = socketio.AsyncClient()
         self.sio.connect(f'http://localhost:{self.cfg.viz_server_port}')
             
