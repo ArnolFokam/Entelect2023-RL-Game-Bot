@@ -5,6 +5,7 @@ import pygame
 import socketio
 
 from ecbot.connection import CiFyClient
+from ecbot.helpers import array_to_bytes
 
 class CyFi(gym.Env):
     metadata = {
@@ -138,7 +139,7 @@ class CyFi(gym.Env):
             self.clock.tick(self.metadata["render_fps"])
         
         if self.socket_connected:
-            self.sio.emit("new_frame", {"frame": frame.tobytes()})
+            self.sio.emit("new_frame", {"frame": array_to_bytes(frame)})
         
         return frame
     
