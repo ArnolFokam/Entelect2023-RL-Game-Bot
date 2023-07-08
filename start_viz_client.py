@@ -1,10 +1,10 @@
 import sys
 import socketio
 
-sio = socketio.Client()
+sio = socketio.AsyncClient()
 
 @sio.event
-def on_new_frame(data):
+async def on_new_frame(data):
     print(data)
     
 if __name__ == "__main__":
