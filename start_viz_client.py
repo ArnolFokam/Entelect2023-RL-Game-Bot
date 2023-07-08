@@ -1,3 +1,4 @@
+import sys
 import socketio
 
 sio = socketio.AsyncClient()
@@ -7,4 +8,5 @@ def on_new_frame(data):
     print(data)
     
 if __name__ == "__main__":
-    sio.connect('http://localhost:6000')
+    sio.connect(f'http://localhost:{sys.argv[1]}')
+    sio.emit("new_frame", {"yo": "yo"})
