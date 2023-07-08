@@ -2,12 +2,13 @@ import sys
 import socketio
 import pygame
 import numpy as np
+from collections import deque
 
 from ecbot.envs.cyfi import CyFi
 from ecbot.helpers import bytes_to_array
 
 sio = socketio.Client()
-frames = []
+frames = deque([], maxlen=100)
 
 @sio.event
 def on_new_frame(data):
@@ -44,7 +45,7 @@ if __name__ == "__main__":
         if len(frames) > 0:
             
             # get the game surface
-            run, frame = frames.pop(0)
+            run, frame = frames.pop()
             
             if run == viz_run:
                 frame = np.rot90(frame, k=1) 
