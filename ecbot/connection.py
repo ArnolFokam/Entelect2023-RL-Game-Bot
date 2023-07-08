@@ -104,27 +104,27 @@ class CiFyClient:
             "Action" : action,                                   
             "BotId" : self.state.bot_id,
         }])
-        time.sleep(0.1)
+        time.sleep(0.3)
         
     def register_new_player(self):
         # register new bot
         print("Registering bot")
         bot_nickname = os.getenv("BOT_NICKNAME") or f"AAIIGBot-{uuid.uuid1()}"
         self.connection.send("Register", [bot_nickname])
-        time.sleep(0.1)
+        time.sleep(0.3)
         
     def connect(self):
         # initiate connection with the game server
         print("Starting connection...")
         self.connection.start()
-        time.sleep(0.1)
+        time.sleep(0.3)
         
     def disconnect(self):
         print("Disconnecting bot...")
         self.connection.stop()
-        time.sleep(0.1)
+        time.sleep(0.3)
         
     def new_game(self):
         self.connection.send("RestartGame", [])
-        time.sleep(0.1)
+        time.sleep(0.3)
         self.register_new_player()

@@ -92,7 +92,10 @@ class PPO(BaseAgent):
                 value = self.critic_network(obs).item()
                 
                 next_state, reward, done, _ = self.env.step(action)
-                self.env.render()
+                
+                # training viz
+                frame = self.env.render()
+                self.env.send_frame_to_socket_server(frame)
                 
                 # append interesting values
                 states.append(state)
