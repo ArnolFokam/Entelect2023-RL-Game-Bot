@@ -188,6 +188,8 @@ class PPO(BaseAgent):
                     **logs,
                     "episode": i_episode + 1
                 }, step=self.steps_done)
+                
+        self.env.disconnect_socket_server()
             
     def save(self, dir):
         torch.save({

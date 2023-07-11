@@ -169,6 +169,10 @@ class CyFi(gym.Env):
                 "frame": array_to_bytes(frame),
                 "run": self.run
             })
+            
+    def disconnect_socket_server(self):
+        if self.socket_connected:
+            self.sio.disconnect()
     
     def _wait_for_game_state(self):
         while not len(self.game_client.state.bot_state) > 0:
