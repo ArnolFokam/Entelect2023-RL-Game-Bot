@@ -6,7 +6,7 @@ WORKDIR /app
 
 RUN python -m venv ecbot
 COPY online-requirements.txt .
-RUN ecbot/bin/pip --no-cache-dir install -r online-requirements.txt
+RUN ecbot/bin/pip --no-cache-dir install -r online-bot-requirements.txt
 
 # TODO: copy the online bot code
 COPY . .
