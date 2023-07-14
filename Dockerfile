@@ -7,8 +7,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN python -m venv ecbot
 
-RUN python --version
-RUN pip --version
+RUN pip install gym
 
 RUN ecbot/bin/pip --no-cache-dir install -r requirements.txt
 
