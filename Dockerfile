@@ -5,7 +5,7 @@ ARG SOURCE_DIRECTORY
 WORKDIR /app
 
 COPY requirements.txt .
-RUN python3 -m venv ecbot && ecbot/pip -r requirements.txt
+RUN python3 -m venv ecbot && ecbot/pip3 -r requirements.txt
 
 COPY . .
 
