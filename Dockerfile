@@ -4,8 +4,9 @@ ARG SOURCE_DIRECTORY
 
 WORKDIR /app
 
-COPY online-bot-requirements.txt .
 RUN python -m venv ecbot
+
+# only woks when not in requirements.txt
 RUN ecbot/bin/pip install signalrcore==0.9.5
 RUN ecbot/bin/pip install gym==0.26.2
 
