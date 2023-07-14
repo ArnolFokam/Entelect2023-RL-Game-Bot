@@ -43,7 +43,7 @@ class CiFyClient:
         self.connection = (
             HubConnectionBuilder()
             .with_url(f"{runner_ip}:{port}/runnerhub")
-            .configure_logging(LogLevel.ERROR)
+            .configure_logging(LogLevel.DEBUG)
             .with_automatic_reconnect(
                 {
                     "keep_alive_interval": 10,
@@ -108,8 +108,9 @@ class CiFyClient:
     def register_new_player(self):
         # register new bot
         print("Registering bot")
+        token = os.getenv("Token") or os.getenv("REGISTRATION_TOKEN")
         bot_nickname = os.getenv("BOT_NICKNAME") or f"AAIIGBot-{uuid.uuid1()}"
-        self.connection.send("Register", [bot_nickname])
+        self.connection.send("Register", [str(token), bot_nickname])
         time.sleep(0.3)
         
     def connect(self):

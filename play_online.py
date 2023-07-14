@@ -1,8 +1,8 @@
 
 import sys
-import hydra
+import os
 import numpy as np
-from omegaconf import DictConfig, open_dict
+from omegaconf import open_dict, OmegaConf
 
 import torch
 
@@ -11,19 +11,21 @@ from ecbot.envs import environments
 
 
 
-@hydra.main(version_base=None)
-def play(cfg: DictConfig) -> None:
+def play(dir):
+    
+    cfg = OmegaConf.load(os.path.join(dir, "config.yaml"))
     
     # no rendering when playing online
     with open_dict(cfg):
         cfg.render_mode = None
+        cfg.game_server_port = 5000
     
     # Use a separate environement for evaluation
     env = environments[cfg.env_name](cfg)
     obs. done = env.reset()
     
     # load the model
-    agent = models[cfg.agent_name].load_trained_agent(cfg.model_dir)
+    agent = models[cfg.agent_name].load_trained_agent(cfg, dir, env)
     
     # game receives the input, before training
     try:
@@ -37,4 +39,5 @@ def play(cfg: DictConfig) -> None:
 
 
 if __name__ == "__main__":
-    play()
+    assert len(sys.argv) == 3
+    play(dir=sys.argv[2])

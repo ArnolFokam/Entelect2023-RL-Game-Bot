@@ -195,14 +195,13 @@ class PPO(BaseAgent):
         torch.save({
             "actor_network": self.actor_network.state_dict(),
             "critic_network": self.critic_network.state_dict(),
-            "cfg": self.cfg
         }, os.path.join(dir, "ppo.pt"))
         
     @classmethod
-    def load_trained_agent(cls, dir):
+    def load_trained_agent(cls, cfg, dir, env):
         # load the agent class
-        artifacts = torch.load(os.path.join(dir, "critic.pt"))
-        agent = cls(artifacts["cfg"], None)
+        artifacts = torch.load(os.path.join(dir, "ppo.pt"))
+        agent = cls(cfg, env)
         
         # load the network weights
         agent.actor_network.load_state_dict(artifacts["actor_network"])

@@ -182,10 +182,10 @@ class DQN(BaseAgent):
         }, os.path.join(dir, "dqn.pt"))
         
     @classmethod
-    def load_trained_agent(cls, dir):
+    def load_trained_agent(cls, cfg, dir, env):
         # load the agent class
         artifacts = torch.load(os.path.join(dir, "dqn.pt"))
-        agent = cls(artifacts["cfg"], None)
+        agent = cls(cfg, env)
         
         # load the network weights
         agent.policy_network.load_state_dict(artifacts["target_network"])

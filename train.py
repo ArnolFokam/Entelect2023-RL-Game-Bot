@@ -6,7 +6,7 @@ import torch
 import random
 import omegaconf
 import numpy as np
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 from hydra.core.hydra_config import HydraConfig
 
 
@@ -45,7 +45,7 @@ def main(cfg: DictConfig) -> None:
     wandb.run.define_metric("eval-mean-reward", step_metric="episode", goal="maximize")
     wandb.run.define_metric("eval-min-behaviour", step_metric="episode")
     wandb.run.define_metric("eval-min-behaviour", step_metric="episode")
-
+    
     env = environments[cfg.env_name](cfg=cfg, run=run_name)
     agent = agents[cfg.agent_name](env=env, cfg=cfg)
     
@@ -55,6 +55,11 @@ def main(cfg: DictConfig) -> None:
     # save agent
     saved_agent_dir = get_dir(f"{HydraConfig.get().runtime.output_dir}/{cfg.env_name}_{cfg.agent_name}_{generate_random_string(5)}")
     agent.save(saved_agent_dir)
+    
+    # save configuration
+    with open(os.path.join(saved_agent_dir, 'config.yaml'), 'w') as f:
+        OmegaConf.save(config=cfg, f=f.name)
+
 
 if __name__ == "__main__":
     if has_valid_hydra_dir_params(sys.argv):

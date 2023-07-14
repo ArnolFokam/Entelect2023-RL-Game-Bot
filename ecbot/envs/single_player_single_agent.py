@@ -99,8 +99,12 @@ class SinglePlayerSingleAgentEnvV2(SinglePlayerSingleAgentEnv):
         return self.observation, None, done, None
     
     def online_reset(self):
+        # register the new bot
+        self.game_client.register_new_player()
         
+        # wait for game state
         self._wait_for_game_state()
         self.observation, _, done = self._return_env_state()
         
+        # return state
         return self.observation, done
