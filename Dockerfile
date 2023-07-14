@@ -6,7 +6,8 @@ WORKDIR /app
 
 COPY requirements.txt .
 RUN python3 -m venv ecbot
-RUN ecbot/bin/pip3 install -r requirements.txt
+RUN ecbot/bin/pip3 --no-cache-dir install --upgrade pip
+RUN ecbot/bin/pip3 --no-cache-dir install -r requirements.txt
 
 COPY . .
 
