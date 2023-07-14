@@ -5,7 +5,8 @@ ARG SOURCE_DIRECTORY
 WORKDIR /app
 
 RUN python -m venv ecbot
-RUN ecbot/bin/pip --no-cache-dir install -r requirements.txt
+COPY online-requirements.txt .
+RUN ecbot/bin/pip --no-cache-dir install -r online-requirements.txt
 
 # TODO: copy the online bot code
 COPY . .

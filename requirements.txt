@@ -11,7 +11,7 @@ signalrcore==0.9.5
 
 # from user
 gym==0.26.2
-torch==1.8.0
+torch==1.8.0+cu116
 pygame==2.1.0
 wandb==0.15.4
 hydra-core==1.3.2
