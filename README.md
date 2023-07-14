@@ -23,7 +23,7 @@ cd publish && dotnet CyFi.dll [port you want the server to run on]
 - While env is running (on another window), run the following command:
 
 ```bash
-python train.py --config-path=exps --config-name=ppo $(python new_hydra_dir_params.py) server game_server_port=[port on which the server is running]
+python train.py --config-path=exps --config-name=ppo $(python new_hydra_dir_params.py) game_server_port=[port on which the server is running]
 ```
 
 Note: if pygame crashes on some iris, swarst issues run the following command:
