@@ -5,10 +5,10 @@ ARG SOURCE_DIRECTORY
 WORKDIR /app
 
 COPY requirements.txt .
-RUN python3 -m venv ecbot
-RUN ecbot/bin/pip3 --no-cache-dir install --upgrade pip
-RUN ecbot/bin/pip3 --no-cache-dir install -r requirements.txt
+RUN python -m venv ecbot
+RUN ecbot/bin/pip --no-cache-dir install --upgrade pip
+RUN ecbot/bin/pip --no-cache-dir install -r requirements.txt
 
 COPY . .
 
-ENTRYPOINT python3 -c 'print("Hello, World!")'
+ENTRYPOINT python -c 'print("Hello, World!")'
