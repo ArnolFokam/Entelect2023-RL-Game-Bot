@@ -1,4 +1,4 @@
-FROM amazon/aws-lambda-python:3.8.2023.04.18.00
+FROM amazon/aws-lambda-python:3.11.2023.07.13.17
 
 ARG SOURCE_DIRECTORY
 
