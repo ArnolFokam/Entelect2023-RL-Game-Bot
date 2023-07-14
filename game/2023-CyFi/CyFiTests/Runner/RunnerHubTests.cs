@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 using Runner.Services;
+using System.Collections.Concurrent;
 
 namespace CyFiTests.Runner
 {
@@ -27,7 +28,7 @@ namespace CyFiTests.Runner
         Mock<ILoggerFactory> mockLoggerFactory;
         Mock<BotFactory> mockBotFactory;
         Mock<WorldFactory> mockWorldFactory;
-        Mock<Queue<BotCommand>> mockQueue;
+        Mock<ConcurrentQueue<BotCommand>> mockQueue;
 
         CyFiEngine engine;
         Mock<ICloudIntegrationService> mockCloudIntegrationService;
@@ -64,7 +65,7 @@ namespace CyFiTests.Runner
             mockLoggerFactory = new Mock<ILoggerFactory>();
             mockBotFactory = new Mock<BotFactory>(testSettings, mockLoggerFactory.Object);
             mockWorldFactory = new Mock<WorldFactory>(mockLoggerFactory.Object);
-            mockQueue = new Mock<Queue<BotCommand>>();
+            mockQueue = new Mock<ConcurrentQueue<BotCommand>>();
 
             mockCloudIntegrationService = new Mock<ICloudIntegrationService>();
             mockLogger = new Mock<ILogger<RunnerHub>>();
@@ -97,11 +98,11 @@ namespace CyFiTests.Runner
             mockBot.Object.NickName = "testBot";
 
             mockBot.Object.Hero = new HeroEntity(Id);
-            mockBotFactory.Setup(f => f.CreateBot("testBot", connectionId.ToString())).Returns(mockBot.Object);
+            mockBotFactory.Setup(f => f.CreateBot(botId, "testBot", connectionId.ToString())).Returns(mockBot.Object);
 
             mockHubCallerContext.Setup(c => c.ConnectionId).Returns(connectionId.ToString());
 
-            await runnerHubUnderTest.Register("testBot");
+            await runnerHubUnderTest.Register(botId, "testBot");
 
             mockCaller.Verify(clients => clients.Caller, Times.Once());
 

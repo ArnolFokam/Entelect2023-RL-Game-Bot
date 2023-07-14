@@ -1,6 +1,7 @@
 
-import sys
 import os
+import sys
+import argparse
 import numpy as np
 from omegaconf import open_dict, OmegaConf
 
@@ -9,9 +10,12 @@ import torch
 from ecbot.agents import models
 from ecbot.envs import environments
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--model_path', required=True)
 
 
 def play(dir):
+    print(f"Playing online with agent at {dir}")
     
     cfg = OmegaConf.load(os.path.join(dir, "config.yaml"))
     
@@ -22,7 +26,7 @@ def play(dir):
     
     # Use a separate environement for evaluation
     env = environments[cfg.env_name](cfg)
-    obs. done = env.reset()
+    obs, done = env.reset()
     
     # load the model
     agent = models[cfg.agent_name].load_trained_agent(cfg, dir, env)
@@ -39,5 +43,5 @@ def play(dir):
 
 
 if __name__ == "__main__":
-    assert len(sys.argv) == 3
-    play(dir=sys.argv[2])
+    args = parser.parse_args()
+    play(dir=args.model_path)

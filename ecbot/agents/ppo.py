@@ -2,8 +2,8 @@ import os
 import numpy as np
 
 import torch
-import torch.optim as optim
 import wandb
+import torch.optim as optim
 from torch.distributions.categorical import Categorical
 
 from ecbot.agents.function_approximators import function_approximators
@@ -200,10 +200,10 @@ class PPO(BaseAgent):
     @classmethod
     def load_trained_agent(cls, cfg, dir, env):
         # load the agent class
-        artifacts = torch.load(os.path.join(dir, "ppo.pt"))
         agent = cls(cfg, env)
         
         # load the network weights
+        artifacts = torch.load(os.path.join(dir, "ppo.pt"))
         agent.actor_network.load_state_dict(artifacts["actor_network"])
         
         return agent
