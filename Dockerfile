@@ -8,9 +8,9 @@ COPY requirements.txt requirements.txt
 
 RUN python3 -m venv ecbot
 RUN source ecbot/bin/activate
-RUN pip3 install --upgrade pip
-RUN pip3 install -r requirements.txt
+RUN python -m pip install --upgrade pip
+RUN python -m pip install -r requirements.txt
 
 COPY ./ecbot ./ecbot
 
-ENTRYPOINT python3 -m ecbot.train 
+ENTRYPOINT python -m ecbot.train 
