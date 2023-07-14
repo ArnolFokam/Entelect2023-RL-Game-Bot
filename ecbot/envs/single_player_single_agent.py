@@ -81,9 +81,26 @@ class SinglePlayerSingleAgentEnvV2(SinglePlayerSingleAgentEnv):
         self._wait_for_game_state()
         
         self.observation, self.info, done = self._return_env_state()
+        
         reward, was_on_bad_floor = self.reward_fn(self.info, )
         
         self.past_k_rewards.append(reward)
         print(f"reward: {reward}, mean: {np.mean(self.past_k_rewards)}")
         done = was_on_bad_floor or done or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
         return self.observation, reward, done, self.info
+    
+    def online_step(self, action: int):
+        # command from the  game server are 1-indexed
+        self.game_client.send_player_command(int(action + 1))
+        self._wait_for_game_state()
+        
+        self.observation, _, done = self._return_env_state()
+        
+        return self.observation, None, done, None
+    
+    def online_reset(self):
+        
+        self._wait_for_game_state()
+        self.observation, _, done = self._return_env_state()
+        
+        return self.observation, done

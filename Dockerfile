@@ -12,4 +12,4 @@ RUN ecbot/bin/pip --no-cache-dir install -r online-bot-requirements.txt
 # TODO: copy the online bot code
 COPY . .
 
-ENTRYPOINT ecbot/bin/python -c 'print("Hello, World!")'
+ENTRYPOINT ecbot/bin/python play_online_test.py

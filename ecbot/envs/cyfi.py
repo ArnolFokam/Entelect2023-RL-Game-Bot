@@ -200,6 +200,9 @@ class CyFi(gym.Env):
     def _get_info(self,):
         raise NotImplementedError
     
+    def online_reset(self):
+        raise NotImplementedError
+    
     def reset(self):
         self.game_client.new_game()
             
