@@ -24,7 +24,6 @@ def main(cfg: DictConfig) -> None:
         torch.cuda.manual_seed_all(cfg.seed)
         
     os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
-    torch.use_deterministic_algorithms(True)
     torch.backends.cudnn.benchmark = True
     torch.manual_seed(cfg.seed)
     random.seed(cfg.seed)
