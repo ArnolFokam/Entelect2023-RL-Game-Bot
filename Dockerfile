@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM public.ecr.aws/m5z5a5b2/languages/python_pytorch:2021
 
 ARG SOURCE_DIRECTORY
 

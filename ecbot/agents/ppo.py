@@ -21,15 +21,15 @@ class PPO(BaseAgent):
         self.actor_network = function_approximators[self.cfg.actor_approximator](
             input_shape=self.observation_shape,
             output_shape=(self.num_actions,), 
-            hidden_dim=self.cfg.hidden_dim,
-            num_hidden_layers=self.cfg.num_hidden_layers
+            hidden_dim=self.cfg.actor_hidden_dim,
+            num_hidden_layers=self.cfg.actor_num_hidden_layers
         )
         
         self.critic_network = function_approximators[self.cfg.critic_approximator](
             input_shape=self.observation_shape,
             output_shape=(1,), 
-            hidden_dim=self.cfg.hidden_dim,
-            num_hidden_layers=self.cfg.num_hidden_layers
+            hidden_dim=self.cfg.critic_hidden_dim,
+            num_hidden_layers=self.cfg.critic_num_hidden_layers
         )
         
     def _select_action(self, state):

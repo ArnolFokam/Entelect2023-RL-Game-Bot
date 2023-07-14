@@ -9,10 +9,6 @@ project: ECBOT-test
 game_server_port: 5000
 viz_server_port: 6000
 
-# architecture
-num_hidden_layers: 3
-hidden_dim: 128
-
 # environment
 env_name: spsa_v2
 render_mode:

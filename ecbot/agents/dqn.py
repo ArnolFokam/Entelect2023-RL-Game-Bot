@@ -45,8 +45,8 @@ class DQN(BaseAgent):
         self.policy_network = function_approximators[self.cfg.q_approximator](
             input_shape=self.observation_shape,
             output_shape=(self.num_actions,), 
-            hidden_dim=self.cfg.hidden_dim,
-            num_hidden_layers=self.cfg.num_hidden_layers
+            hidden_dim=self.cfg.q_hidden_dim,
+            num_hidden_layers=self.cfg.q_num_hidden_layers
         )
         self.target_network = deepcopy(self.policy_network)
         

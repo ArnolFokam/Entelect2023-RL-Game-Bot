@@ -12,3 +12,7 @@ eps_start: 0.9
 eps_end: 0.05
 eps_decay: 8500
 buffer_size: 10000
+
+# network architecture
+q_num_hidden_layers: 3
+q_hidden_dim: 128
