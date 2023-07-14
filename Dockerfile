@@ -5,11 +5,9 @@ ARG SOURCE_DIRECTORY
 WORKDIR /app
 
 RUN python -m venv ecbot
+RUN ecbot/bin/pip --no-cache-dir install -r requirements.txt
 
-# only woks when not in requirements.txt
-RUN ecbot/bin/pip install signalrcore==0.9.5
-RUN ecbot/bin/pip install gym==0.26.2
-
+# TODO: copy the online bot code
 COPY . .
 
-ENTRYPOINT python -c 'print("Hello, World!")'
+ENTRYPOINT ecbot/bin/python -c 'print("Hello, World!")'
