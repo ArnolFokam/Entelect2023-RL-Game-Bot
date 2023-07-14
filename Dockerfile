@@ -6,8 +6,8 @@ WORKDIR /app
 
 COPY online-bot-requirements.txt .
 RUN python -m venv ecbot
-RUN ecbot/bin/pip install signalrcore
-RUN ecbot/bin/pip install -r online-bot-requirements.txt
+RUN ecbot/bin/pip install signalrcore==0.9.5
+RUN ecbot/bin/pip install gym==0.26.2
 
 COPY . .
 
