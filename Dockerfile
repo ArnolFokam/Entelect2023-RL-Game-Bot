@@ -1,7 +1,8 @@
 FROM public.ecr.aws/m5z5a5b2/languages/python_pytorch:2021
 
-ARG SOURCE_DIRECTORY
+ARG ONLINE_MODEL_PATH
 
+RUN echo "ONLINE_MODEL_PATH: $ONLINE_MODEL_PATH"
 WORKDIR /app
 
 RUN python -m venv ecbot
