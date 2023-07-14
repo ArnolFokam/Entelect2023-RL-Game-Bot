@@ -1,2 +1,2 @@
 # baseline run single
-python train.py --config-path=exps --config-name=spsa-ppo $(python new_hydra_dir_params.py)
+python train.py --config-path=exps --config-name=ppo $(python new_hydra_dir_params.py)
