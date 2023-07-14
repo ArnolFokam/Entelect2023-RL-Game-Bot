@@ -43,7 +43,7 @@ class CiFyClient:
         self.connection = (
             HubConnectionBuilder()
             .with_url(f"{runner_ip}:{port}/runnerhub")
-            .configure_logging(LogLevel.DEBUG)
+            .configure_logging(LogLevel.ERROR)
             .with_automatic_reconnect(
                 {
                     "keep_alive_interval": 10,
