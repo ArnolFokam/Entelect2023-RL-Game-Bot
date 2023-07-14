@@ -160,8 +160,12 @@ class CyFi(gym.Env):
         def connect_error():
             print('[INFO] Failed to connect to server.')
             self.socket_connected = False
-            
-        self.sio.connect(f'http://localhost:{self.cfg.viz_server_port}')
+        
+        try:
+            self.sio.connect(f'http://localhost:{self.cfg.viz_server_port}')
+        except TypeError:
+            print('[INFO] Server is not initialized.')
+            self.socket_connected = False
     
     def send_frame_to_socket_server(self, frame):
         if self.socket_connected:
