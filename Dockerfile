@@ -5,9 +5,12 @@ ARG SOURCE_DIRECTORY
 WORKDIR /app
 
 COPY requirements.txt requirements.txt
+
+RUN python3 -m venv ecbot
+RUN source ecbot/bin/activate
 RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
 
 COPY ./ecbot ./ecbot
 
-ENTRYPOINT python3 train.py --config-path=exps --config-name=ppo $(python new_hydra_dir_params.py)
+ENTRYPOINT python3 -m ecbot.train 
