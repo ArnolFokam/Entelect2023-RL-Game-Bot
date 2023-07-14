@@ -1,22 +1,9 @@
-.PHONY: push pushb pusht pushr pushf pushn
+.PHONY: push
 
-# git commands
 push:
 	git add .
-	git commit -m "$(message)"
+	git commit -m "$(commit)"
 	git push
 
-pushb: message=bug fix
-pushb: push
-
-pushf: message=feature enhancement
-pushf: push
-
-pushr: message=refactoring
-pushr: push
-
-pushn: message=update notes
-pushn: push
-
-pusht: message=testing
-pusht: push
+train:
+	python train.py --config-path=exps --config-name=$(exp)
