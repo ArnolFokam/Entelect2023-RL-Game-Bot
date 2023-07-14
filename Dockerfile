@@ -4,13 +4,11 @@ ARG SOURCE_DIRECTORY
 
 WORKDIR /app
 
-COPY requirements.txt requirements.txt
+COPY requirements.txt .
 
-RUN python3 -m venv ecbot
-RUN source ecbot/bin/activate
-RUN python -m pip install --upgrade pip
-RUN python -m pip install -r requirements.txt
+RUN python3 -m venv /opt/ecbot
+RUN /opt/ecbot/pip -r requirements.txt
 
-COPY ./ecbot ./ecbot
+COPY . .
 
-ENTRYPOINT python -m ecbot.train 
+ENTRYPOINT python3 -c 'print("Hello, World!")'
