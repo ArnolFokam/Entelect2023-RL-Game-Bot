@@ -33,6 +33,7 @@ class SinglePlayerSingleAgentEnv(CyFi):
         # Note: the agent is at the center of the window
         self.observation_space = spaces.Box(low=0, high=6, shape=(34 * 22,), dtype=int)
         
+        
         self.reward_fn = reward_fn[self.cfg.reward_fn](self.cfg)
         self.past_k_rewards = deque([], maxlen=self.cfg.reward_backup_len) 
 
@@ -59,6 +60,7 @@ class SinglePlayerSingleAgentEnv(CyFi):
         
     def _get_observation(self, game_state):
         return np.array(game_state[Constants.HERO_WINDOW], dtype=np.uint8).flatten()
+    
         
     def _get_info(self, game_state):
         return {
@@ -73,7 +75,7 @@ class SinglePlayerSingleAgentEnv(CyFi):
         }
 
 class SinglePlayerSingleAgentEnvV2(SinglePlayerSingleAgentEnv):
-    
+
     def step(self, action: int):
         
         # command from the  game server are 1-indexed
@@ -82,6 +84,37 @@ class SinglePlayerSingleAgentEnvV2(SinglePlayerSingleAgentEnv):
         
         self.observation, self.info, done = self._return_env_state()
         
+        reward, was_on_bad_floor = self.reward_fn(self.info, )
+        
+        self.past_k_rewards.append(reward)
+        print(f"reward: {reward}, mean: {np.mean(self.past_k_rewards)}")
+        done = was_on_bad_floor or done or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
+        return self.observation, reward, done, self.info
+    
+class SinglePlayerSingleAgentEnvV3(SinglePlayerSingleAgentEnv):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.reset_game = True
+        self.num_frames = 4
+
+    def _get_observation(self, game_state):
+        obs = np.array(game_state[Constants.HERO_WINDOW], dtype=np.float32) / 6
+        return obs
+    
+    def reset(self):
+        observation = super().reset()
+        self.past_k_rewards = deque([], maxlen=self.cfg.reward_backup_len)
+        self.reward_fn.reset(self.info)
+        return observation
+
+    def step(self, action: int):
+        
+        # command from the  game server are 1-indexed
+        self.game_client.send_player_command(int(action + 1))
+        self._wait_for_game_state()
+        
+        self.observation, self.info, done = self._return_env_state()
         reward, was_on_bad_floor = self.reward_fn(self.info, )
         
         self.past_k_rewards.append(reward)

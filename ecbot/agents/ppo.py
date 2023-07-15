@@ -37,12 +37,13 @@ class PPO(BaseAgent):
         action_dist = Categorical(logits=action_logits)
         action = action_dist.sample()
         action_log_prob = action_dist.log_prob(action)
-        return action.item(), action_log_prob.item()
+        entropy = -(action_logits * action_logits.log()).sum() 
+        return action.item(), action_log_prob.item(), entropy.item()
         
         
     def act(self, state):
-        action, _ = self._select_action(state)
-        return action
+        action, _, entropy = self._select_action(state)
+        return action, entropy
     
     def compute_general_advantage_estimates(self, rewards, values):
         next_values = np.concatenate([values[1:], [0]])
@@ -75,6 +76,10 @@ class PPO(BaseAgent):
             
             # perform a rollout
             state = self.env.reset()
+            temp_state = np.zeros((4,34,22))
+            for i in range(4):
+                temp_state[i,:,:] = state
+            state = temp_state
             ep_rewards = 0.0
             
             states = []
@@ -88,10 +93,16 @@ class PPO(BaseAgent):
                 obs = torch.tensor(np.array([state]), dtype=torch.float32, device=self.device)
                 
                 # get the  action and value for that state
-                action, action_log_prob = self._select_action(obs)
+                
+                action, action_log_prob, entropy = self._select_action(obs)
                 value = self.critic_network(obs).item()
                 
                 next_state, reward, done, _ = self.env.step(action)
+                reward += entropy *0.001
+                temp_next_state = state
+                temp_next_state[1:,:,:] = temp_next_state[temp_next_state.shape[0]-1:,:]
+                temp_next_state[0,:,:] = next_state
+                next_state = temp_next_state
                 
                 # training viz
                 frame = self.env.render()

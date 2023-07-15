@@ -10,8 +10,8 @@ game_server_port: 5000
 viz_server_port: 6000
 
 # environment
-env_name: spsa_v2
-render_mode:
+env_name: spsa_v3
+render_mode: 'human'
 past_reward_threshold: -100000000
 reward_backup_len: 100
 
@@ -27,13 +27,13 @@ log_every_episodes: 10
 reward_fn: coins_on_platform
 
 # rewards
-step_penalty: -0.5
-on_bad_floor_penalty: -100.0
-less_coin_penalty_multiplier: 1
+step_penalty: -0.05
+on_bad_floor_penalty: -10
+less_coin_penalty_multiplier: 0.5 # difference between past and previous coin 
 
 # penalties
 on_good_floor_reward: 0
-more_coin_reward_multiplier: 8
+more_coin_reward_multiplier: 2
 initial_position_reward: 0
 
 # others
