@@ -108,8 +108,8 @@ class CiFyClient:
     def register_new_player(self):
         # register new bot
         print("Registering bot")
-        token = os.getenv("Token") or os.getenv("REGISTRATION_TOKEN")
-        bot_nickname = os.getenv("BOT_NICKNAME") or f"AAIIGBot-{uuid.uuid1()}"
+        token = os.getenv("Token") or os.getenv("REGISTRATION_TOKEN") or uuid.uuid1()
+        bot_nickname = os.getenv("BOT_NICKNAME") or f"AAIIGBot-Wits"
         self.connection.send("Register", [str(token), bot_nickname])
         time.sleep(0.3)
         

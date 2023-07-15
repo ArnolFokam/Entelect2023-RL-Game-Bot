@@ -4,17 +4,19 @@ using CyFi.Models;
 using CyFi.RootState;
 using CyFi.Runner;
 using Domain.Components;
+using Domain.Enums;
 using Domain.Exceptions;
 using Domain.Models;
 using Domain.Objects;
 using Engine;
+using Engine.Communication;
 using Logger;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Python.Core;
 using Runner.Services;
+using System.Collections.Concurrent;
 using System.Drawing;
 using System.Timers;
 using static CyFi.Settings.GameSettings;
@@ -31,16 +33,18 @@ namespace CyFi
 
         private BotFactory BotFactory;
         public static Timer TickTimer;
+        public static Timer ConnectionTimer;
         public IGameLogger<CyFiEngine> Logger;
         public IGameLogger<CyFiState> StateLogger;
         public IGameLogger<GameComplete> GameCompleteLogger;
 
-        public Queue<BotCommand> CommandQueue;
+        public ConcurrentQueue<BotCommand> CommandQueue;
 
         public HubConnection hubConnection;
         public IHubContext<RunnerHub> context;
 
         private List<WorldObject> levels;
+        private Dictionary<int, int> advances = new();
 
         private string cloudSeed;
 
@@ -58,7 +62,7 @@ namespace CyFi
         public CyFiEngine(
             IOptions<CyFiGameSettings> settings,
             IHubContext<RunnerHub> context,
-            Queue<BotCommand> CommandQueue,
+            ConcurrentQueue<BotCommand> CommandQueue,
             ILogger<CyFiEngine> Logger,
             ILogger<CyFiState> StateLogger,
             ILogger<GameComplete> GameCompleteLogger,
@@ -102,6 +106,7 @@ namespace CyFi
             for (int level = 0; level < GameSettings.Levels.Count; level++)
             {
                 levels.Add(worldFactory.CreateWorld(GameSettings.Levels[level], level));
+                advances[level] = 0;
             }
 
             cyFiState = new CyFiState(
@@ -111,21 +116,27 @@ namespace CyFi
             );
 
 
-            this.GameCompleteLogger = new GameLogger<GameComplete>(GameCompleteLogger);
             this.Logger = new GameLogger<CyFiEngine>(Logger);
             this.StateLogger = new GameLogger<CyFiState>(StateLogger);
+            this.GameCompleteLogger = new GameLogger<GameComplete>(GameCompleteLogger);
 
             // Create a timer with a given interval
             TickTimer = new Timer(GameSettings.TickTimer);
+
+            int timeoutMillis = int.TryParse(Environment.GetEnvironmentVariable("BOT_TIMEOUT"), out timeoutMillis) ? timeoutMillis : 300000; // 5 minutes
+            ConnectionTimer = new(timeoutMillis);
+            ConnectionTimer.Elapsed += BotConnectionTimeout;
+            ConnectionTimer.AutoReset = false;
+            ConnectionTimer.Enabled = true;
         }
 
         public HubConnection SetHubConnection(ref HubConnection connection) => hubConnection = connection;
 
-        public Guid RegisterBot(string nickName, string connectionId)
+        public Guid RegisterBot(Guid token, string nickName, string connectionId)
         {
             if (cyFiState.Bots.Count < GameSettings.NumberOfPlayers)
             {
-                Bot bot = BotFactory.CreateBot(nickName, connectionId);
+                Bot bot = BotFactory.CreateBot(token, nickName, connectionId);
                 Point startPosition = cyFiState.Levels[bot.CurrentLevel].start;
                 bot.Hero.XPosition = startPosition.X;
                 bot.Hero.YPosition = startPosition.Y;
@@ -185,7 +196,7 @@ namespace CyFi
 
             }
 
-            hubConnection.InvokeAsync("PublishBotStates", botStates);
+            hubConnection.InvokeAsync("PublishBotStates", botStates).Wait();
 
         }
 
@@ -199,19 +210,24 @@ namespace CyFi
 
             for (int i = 0; i < 3; i++)
             {
-                if (!CommandQueue.IsNullOrEmpty()) // perhaps only process commands for a certain duration of time, after that process the physics updates. Do this instead of the tick timer
+                if (CommandQueue.TryDequeue(out BotCommand? playerAction)) // perhaps only process commands for a certain duration of time, after that process the physics updates. Do this instead of the tick timer
                 {
-                    // Get the first bot command in the queue
-                    BotCommand playerAction = CommandQueue.Dequeue();
+                    
+                    if (playerAction == null)
+                    {
+                        return;
+                    }
 
                     // Get the bot it belongs too
                     playerObject = cyFiState.Bots.FirstOrDefault((bot) => bot.Id.Equals(playerAction.BotId));
 
-                    int numOnLevel = cyFiState.Bots.Count((bot) => bot.CurrentLevel == playerObject.CurrentLevel);
+                    int numAlreadyAdvanced = advances[playerObject.CurrentLevel];
 
-                    if (playerObject.Hero.Collected >= GameSettings.Collectables[numOnLevel - 1])
+                    if (playerObject.Hero.Collected >= GameSettings.Collectables[Math.Max(0, GameSettings.Collectables.Length - playerObject.CurrentLevel - 1)])
                     {
+                        advances[playerObject.CurrentLevel]++;
                         AdvanceToLevel(playerObject);
+
                         playerObject.Hero.Collected = 0;
                         return;
                     }
@@ -275,7 +291,7 @@ namespace CyFi
         {
             if (bot.CurrentLevel < GameSettings.Levels.Count - 1)
             {
-                CommandQueue = new Queue<BotCommand>(CommandQueue.Where(command => command.BotId != bot.Id));
+                CommandQueue = new ConcurrentQueue<BotCommand>(CommandQueue.Where(command => command.BotId != bot.Id));
 
                 bot.CurrentLevel++;
                 bot.TotalPoints += bot.Hero.Collected;
@@ -305,13 +321,6 @@ namespace CyFi
 
             var rankedBots = cyFiState.Bots.OrderByDescending(bot => bot.TotalPoints).ToList();
 
-            for (int index = 0; index < rankedBots.Count; index++)
-            {
-                var currentBot = rankedBots[index];
-                cloudIntegrationService.UpdatePlayer(currentBot.Id.ToString(), finalScore: currentBot.TotalPoints, matchPoints: currentBot.TotalPoints, placement: index + 1);
-            }
-
-
             if (rankedBots.Count > 0) {
                 var gameComplete = new GameComplete
                 {
@@ -330,6 +339,12 @@ namespace CyFi
                     WinngingBot = rankedBots.First()
                 };
                 GameCompleteLogger.File(gameComplete, null, "GameComplete");
+            }
+            
+            for (int index = 0; index < rankedBots.Count; index++)
+            {
+                var currentBot = rankedBots[index];
+                cloudIntegrationService.UpdatePlayer(currentBot.Id.ToString(), finalScore: currentBot.TotalPoints, matchPoints: currentBot.TotalPoints, placement: index + 1);
             }
 
             StateLogger.File(null, FILE_STATE.END);
@@ -375,6 +390,17 @@ namespace CyFi
         internal bool HasBotMoved(BotCommand command)
         {
             return CommandQueue.Contains(command);
+        }
+
+        private void BotConnectionTimeout(object? sender, ElapsedEventArgs e)
+        {
+            if (cyFiState.Bots.Count < GameSettings.NumberOfPlayers)
+            {
+                var failReason = $"Only {cyFiState.Bots.Count} out of {GameSettings.NumberOfPlayers} bots connected in time, runner is shutting down.";
+                Logger.Log(LogLevel.Error, failReason);
+
+                cloudIntegrationService.Announce(CloudCallbackType.Failed, new Exception(failReason)).Wait();
+            }
         }
     }
 }

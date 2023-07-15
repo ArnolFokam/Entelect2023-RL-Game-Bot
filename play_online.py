@@ -7,7 +7,7 @@ from omegaconf import open_dict, OmegaConf
 
 import torch
 
-from ecbot.agents import models
+from ecbot.agents import agents
 from ecbot.envs import environments
 
 parser = argparse.ArgumentParser()
@@ -25,11 +25,11 @@ def play(dir):
         cfg.game_server_port = 5000
     
     # Use a separate environement for evaluation
-    env = environments[cfg.env_name](cfg)
-    obs, done = env.reset()
+    env = environments[cfg.env_name](cfg, run="online")
+    obs, done = env.online_reset()
     
     # load the model
-    agent = models[cfg.agent_name].load_trained_agent(cfg, dir, env)
+    agent = agents[cfg.agent_name].load_trained_agent(cfg, dir, env)
     
     # game receives the input, before training
     try:

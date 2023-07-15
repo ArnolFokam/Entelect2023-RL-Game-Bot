@@ -20,4 +20,4 @@ COPY play_online.py .
 
 RUN ls -la
 
-ENTRYPOINT ecbot-env/bin/python play_online.py bot/
+ENTRYPOINT ecbot-env/bin/python play_online.py --model_path bot/

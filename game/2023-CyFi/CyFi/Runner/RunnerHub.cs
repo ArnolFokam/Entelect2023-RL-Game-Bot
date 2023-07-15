@@ -67,10 +67,10 @@ namespace CyFi.Runner
         /// 
         public async Task PublishBotStates(List<BotStateDTO> botStates)
         {
-            foreach (var botState in botStates)
+            await Parallel.ForEachAsync(botStates, async (botState, cancellationToken) =>
             {
-                await Clients.Client(botState.ConnectionId).SendAsync("ReceiveBotState", botState);
-            }
+                await Clients.Client(botState.ConnectionId).SendAsync("ReceiveBotState", botState, cancellationToken);
+            });
         }
 
         /// <summary>
@@ -97,12 +97,12 @@ namespace CyFi.Runner
         /// </summary>
         /// <param name="nickName"></param>
         /// <returns></returns>
-        public async Task Register(string nickName)
+        public async Task Register(Guid token, string nickName)
         {
             _logger.Log(LogLevel.Information, $"Registering Bot with nickname: {nickName}");
             try
             {
-                Guid botId = engine.RegisterBot(nickName, Context.ConnectionId);
+                Guid botId = engine.RegisterBot(token, nickName, Context.ConnectionId);
                 _logger.Log(LogLevel.Debug, $"Successfully registered bot with nickname {nickName} and id {botId}");
 
                 await Clients.Caller.SendAsync("Registered", botId);
@@ -136,7 +136,7 @@ namespace CyFi.Runner
             }
 
             //Check if bot has already had a command lined up on the queue
-            if (!engine.HasBotMoved(command))
+            if (!engine.CommandQueue.Any(c => c.BotId == command.BotId))
             {
                 engine.CommandQueue.Enqueue(command);
             }
