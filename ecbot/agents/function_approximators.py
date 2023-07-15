@@ -1,5 +1,33 @@
+import numpy as np
 from typing import Optional
+
+import torch
 import torch.nn as nn
+
+def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
+    torch.nn.init.orthogonal_(layer.weight, std)
+    torch.nn.init.constant_(layer.bias, bias_const)
+    return layer
+
+class CNN(nn.Module):
+    def __init__(
+        self,
+        output_shape,
+        *args, **kwargs):
+        
+        assert len(output_shape) == 1
+        
+        super().__init__()  
+        
+        # TODO: Build the CNN
+        self.cnn = None
+        
+        # TODO: Build the fully connected layers
+        self.mlp = None
+        
+    def forward(self, x):
+        x = self.cnn(x)
+        return self.mlp(x.view(x.size(0), -1))
 
 class MLP(nn.Module):
     
@@ -8,7 +36,8 @@ class MLP(nn.Module):
         input_shape,
         output_shape, 
         hidden_dim: Optional[int] = 128,
-        num_hidden_layers: Optional[int] = 1) -> None:
+        num_hidden_layers: Optional[int] = 1,
+        *args, **kwargs) -> None:
         
         assert isinstance(hidden_dim, int) and hidden_dim > 0
         assert isinstance(num_hidden_layers, int) and num_hidden_layers >= 1 
@@ -25,9 +54,9 @@ class MLP(nn.Module):
             output_dim = hidden_dim if i < num_hidden_layers - 1 else output_shape[0]
             
             if 0 < i < num_hidden_layers - 1:
-                self.layers.extend([nn.Linear(input_dim, output_dim), nn.ReLU()])
+                self.layers.extend([layer_init(nn.Linear(input_dim, output_dim)), nn.Tanh()])
             else:
-                self.layers.append(nn.Linear(input_dim, output_dim))
+                self.layers.append(layer_init(nn.Linear(input_dim, output_dim), std=0.01))
                 
         self.layers = nn.Sequential(*self.layers)
         
@@ -38,5 +67,5 @@ class MLP(nn.Module):
 
 function_approximators = {
     "mlp": MLP,
-    "cnn": None
+    "cnn": CNN
 }
