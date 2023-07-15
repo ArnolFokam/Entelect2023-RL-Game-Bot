@@ -37,6 +37,7 @@ def play(dir):
             obs = torch.tensor(np.array([obs]), dtype=torch.float32)
             action = agent.act(obs)
             obs, _, done, _ = env.online_step(action)
+            # TODO: print cumulative rewards for debugging
     except KeyboardInterrupt:
         env.game_client.disconnect()
         sys.exit(0)
