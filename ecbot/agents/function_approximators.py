@@ -10,20 +10,31 @@ def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
     return layer
 
 class CNN(nn.Module):
-    def __init__(
-        self,
-        output_shape,
-        *args, **kwargs):
+    def __init__(self, input_filters, filters, output_shape, *args, **kwargs):
         
+        assert isinstance(input_filters, int) and input_filters > 0
+        assert isinstance(filters, list) and len(filters) > 0
         assert len(output_shape) == 1
         
         super().__init__()  
         
-        # TODO: Build the CNN
-        self.cnn = None
+        # Build the CNN
+        cnn_layers = [*self._get_conv_layer(input_filters, filters[0])]
         
-        # TODO: Build the fully connected layers
-        self.mlp = None
+        for i in range(len(filters) - 1):
+            cnn_layers.extend(self._get_conv_layer(filters[i], filters[i+1]))
+        
+        self.cnn = nn.Sequential(*cnn_layers)
+        
+        # Build the fully connected layers
+        self.mlp = layer_init(nn.Linear(filters[-1] * 4 * 4, output_shape[0]), std=0.01)
+        
+    def _get_conv_layer(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1):
+        return [
+            nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, stride=stride, padding=padding),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        ]
         
     def forward(self, x):
         x = self.cnn(x)
