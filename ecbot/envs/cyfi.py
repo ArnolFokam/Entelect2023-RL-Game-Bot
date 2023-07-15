@@ -164,7 +164,7 @@ class CyFi(gym.Env):
         try:
             self.sio.connect(f'http://localhost:{self.cfg.viz_server_port}')
         except TypeError:
-            print('[INFO] Server is not initialized.')
+            print('socket server is not initialized.')
             self.socket_connected = False
     
     def send_frame_to_socket_server(self, frame):
@@ -190,7 +190,7 @@ class CyFi(gym.Env):
         # get observation and info
         self.observation = self._get_observation(game_state)
         self.info = self._get_info(game_state)
-        completed = self.game_client.state.game_completed
+        completed = self.game_client.state.game_completed or not self.game_client.state.connected
         
         return self.observation, self.info, completed
     
