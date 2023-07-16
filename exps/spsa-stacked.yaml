@@ -28,13 +28,13 @@ log_every_episodes: 10
 reward_fn: coins_on_platform
 
 # rewards
-step_penalty: -0.5
-on_bad_floor_penalty: -100.0
+step_penalty: -0.005
+on_bad_floor_penalty: -1.0
 less_coin_penalty_multiplier: 1
 
 # penalties
 on_good_floor_reward: 0
-more_coin_reward_multiplier: 8
+more_coin_reward_multiplier: 10
 initial_position_reward: 0
 
 # others
