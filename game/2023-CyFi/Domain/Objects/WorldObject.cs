@@ -702,6 +702,7 @@ namespace Domain.Objects
             start = new(startingPoint.Item1, startingPoint.Item2 + 1);
 
             Console.WriteLine($"Start position {start} ");
+            System.Environment.Exit(0); 
         }
 
         /// <summary>
