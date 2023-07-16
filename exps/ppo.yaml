@@ -13,11 +13,13 @@ max_actor_train_iterations: 5
 critic_train_iterations: 10
 
 # actor network architecture
-actor_approximator: mlp
-actor_num_hidden_layers: 3
-actor_hidden_dim: 64
+actor:
+  approximator: mlp
+  num_hidden_layers: 3
+  hidden_dim: 64
 
 # value network architecture
-critic_approximator: mlp
-critic_num_hidden_layers: 1
-critic_hidden_dim: 64
+critic:
+  approximator: mlp
+  num_hidden_layers: 1
+  hidden_dim: 64

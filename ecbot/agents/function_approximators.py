@@ -10,24 +10,24 @@ def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
     return layer
 
 class CNN(nn.Module):
-    def __init__(self, input_filters, filters, output_shape, *args, **kwargs):
+    def __init__(self, arch_cfg, input_shape, output_shape, *args, **kwargs):
         
-        assert isinstance(input_filters, int) and input_filters > 0
-        assert isinstance(filters, list) and len(filters) > 0
+        assert isinstance(arch_cfg.filters, list) and len(arch_cfg.filters) > 0
+        assert len(input_shape) == 3
         assert len(output_shape) == 1
         
         super().__init__()  
         
         # Build the CNN
-        cnn_layers = [*self._get_conv_layer(input_filters, filters[0])]
+        cnn_layers = [*self._get_conv_layer(input_shape[0], arch_cfg.filters[0])]
         
-        for i in range(len(filters) - 1):
-            cnn_layers.extend(self._get_conv_layer(filters[i], filters[i+1]))
+        for i in range(len(arch_cfg.filters) - 1):
+            cnn_layers.extend(self._get_conv_layer(arch_cfg.filters[i], arch_cfg.filters[i+1]))
         
         self.cnn = nn.Sequential(*cnn_layers)
         
         # Build the fully connected layers
-        self.mlp = layer_init(nn.Linear(filters[-1] * 4 * 4, output_shape[0]), std=0.01)
+        self.mlp = layer_init(nn.Linear(arch_cfg.filters[-1] * 4 * 4, output_shape[0]), std=0.01)
         
     def _get_conv_layer(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1):
         return [
@@ -40,18 +40,13 @@ class CNN(nn.Module):
         x = self.cnn(x)
         return self.mlp(x.view(x.size(0), -1))
 
+
 class MLP(nn.Module):
     
-    def __init__(
-        self, 
-        input_shape,
-        output_shape, 
-        hidden_dim: Optional[int] = 128,
-        num_hidden_layers: Optional[int] = 1,
-        *args, **kwargs) -> None:
+    def __init__(self, arch_cfg, input_shape, output_shape,*args, **kwargs) -> None:
         
-        assert isinstance(hidden_dim, int) and hidden_dim > 0
-        assert isinstance(num_hidden_layers, int) and num_hidden_layers >= 1 
+        assert isinstance(arch_cfg.hidden_dim, int) and arch_cfg.hidden_dim > 0
+        assert isinstance(arch_cfg.num_hidden_layers, int) and arch_cfg.num_hidden_layers >= 1 
         assert len(input_shape) == 1
         assert len(output_shape) == 1
         
@@ -60,11 +55,11 @@ class MLP(nn.Module):
         # build the neural network of the policy network
         self.layers =  [] 
         
-        for i in range(num_hidden_layers):
-            input_dim = hidden_dim if i > 0 else input_shape[0]
-            output_dim = hidden_dim if i < num_hidden_layers - 1 else output_shape[0]
+        for i in range(arch_cfg.num_hidden_layers):
+            input_dim = arch_cfg.hidden_dim if i > 0 else input_shape[0]
+            output_dim = arch_cfg.hidden_dim if i < arch_cfg.num_hidden_layers - 1 else output_shape[0]
             
-            if 0 < i < num_hidden_layers - 1:
+            if 0 < i < arch_cfg.num_hidden_layers - 1:
                 self.layers.extend([layer_init(nn.Linear(input_dim, output_dim)), nn.Tanh()])
             else:
                 self.layers.append(layer_init(nn.Linear(input_dim, output_dim), std=0.01))
