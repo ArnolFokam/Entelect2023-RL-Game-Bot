@@ -1,5 +1,5 @@
 defaults:
-  - spsa
+  - spsa-stacked
   - _self_
 
 # agent
@@ -14,12 +14,16 @@ critic_train_iterations: 10
 
 # actor network architecture
 actor:
-  approximator: mlp
-  num_hidden_layers: 3
-  hidden_dim: 64
+  # approximator: mlp
+  # num_hidden_layers: 3
+  # hidden_dim: 64
+  approximator: cnn
+  filters: [32, 64, 64]
 
 # value network architecture
 critic:
-  approximator: mlp
-  num_hidden_layers: 1
-  hidden_dim: 64
+  # approximator: mlp
+  # num_hidden_layers: 1
+  # hidden_dim: 64
+  approximator: cnn
+  filters: [32, 64]

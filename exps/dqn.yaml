@@ -4,7 +4,6 @@ defaults:
 
 # agent
 agent_name: dqn
-q_approximator: mlp
 learning_rate: 1e-4
 batch_size: 64
 tau: 0.9996
@@ -13,6 +12,7 @@ eps_end: 0.05
 eps_decay: 8500
 buffer_size: 10000
 
-# network architecture
+# q-network architecture
+q_approximator: mlp
 q_num_hidden_layers: 3
 q_hidden_dim: 128

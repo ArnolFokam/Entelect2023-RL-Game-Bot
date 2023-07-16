@@ -8,7 +8,7 @@ from ecbot.connection import Constants
 from ecbot.envs.cyfi import CyFi
 from ecbot.envs.rewards import reward_fn
 
-class SinglePlayerSingleAgentEnv(CyFi):
+class SinglePlayerSingleAgentStackedFramesEnv(CyFi):
     
     def __init__(self, *args, **kwargs):
 
@@ -31,10 +31,12 @@ class SinglePlayerSingleAgentEnv(CyFi):
         
         # Our CiFy agent only knows about its windowed view of the world
         # Note: the agent is at the center of the window
-        self.observation_space = spaces.Box(low=0, high=6, shape=(34 * 22,), dtype=int)
+        self.observation_space = spaces.Box(low=0.0, high=1.0, shape=(self.cfg.num_frames, 34, 22), dtype=float)
         
         self.reward_fn = reward_fn[self.cfg.reward_fn](self.cfg)
-        self.past_k_rewards = deque([], maxlen=self.cfg.reward_backup_len) 
+        self.past_k_rewards = deque([], maxlen=self.cfg.reward_backup_len)
+        
+        self.game_has_reset = False
 
 
     def step(self, action: int):
@@ -52,13 +54,22 @@ class SinglePlayerSingleAgentEnv(CyFi):
         return self.observation, reward, done, self.info
     
     def reset(self):
+        self.game_has_reset = True
         observation = super().reset()
         self.past_k_rewards = deque([], maxlen=self.cfg.reward_backup_len)
         self.reward_fn.reset(self.info)
         return observation
         
     def _get_observation(self, game_state):
-        return np.array(game_state[Constants.HERO_WINDOW], dtype=np.uint8).flatten()
+        if self.game_has_reset:
+            # use the start frame in all frames
+            return np.array([game_state[Constants.HERO_WINDOW]] * self.cfg.num_frames, dtype=np.float32) / 6.0
+        else:
+            # enqueue the current frame and dequeue the oldest frame
+            return np.concatenate([
+                self.observation[1:], [
+                    np.array(game_state[Constants.HERO_WINDOW], dtype=np.float32) / 6.0
+                ]], axis=0)
         
     def _get_info(self, game_state):
         return {
@@ -71,20 +82,3 @@ class SinglePlayerSingleAgentEnv(CyFi):
             "collected": game_state[Constants.COLLECTED],
             "current_level": game_state[Constants.CURRENT_LEVEL]
         }
-
-class SinglePlayerSingleAgentEnvV2(SinglePlayerSingleAgentEnv):
-    
-    def step(self, action: int):
-        
-        # command from the  game server are 1-indexed
-        self.game_client.send_player_command(int(action + 1))
-        self._wait_for_game_state()
-        
-        self.observation, self.info, done = self._return_env_state()
-        
-        reward, was_on_bad_floor = self.reward_fn(self.info, )
-        
-        self.past_k_rewards.append(reward)
-        print(f"reward: {reward}, mean: {np.mean(self.past_k_rewards)}")
-        done = was_on_bad_floor or done or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
-        return self.observation, reward, done, self.info
