@@ -18,7 +18,7 @@ actor:
   # num_hidden_layers: 3
   # hidden_dim: 64
   approximator: cnn
-  filters: [32, 64, 64]
+  filters: [32, 32]
 
 # value network architecture
 critic:
