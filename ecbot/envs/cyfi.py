@@ -48,6 +48,7 @@ class CyFi(gym.Env):
         self.sio = None
         self.socket_connected = False
         
+        # TODO: setup socket in another thread at regular intervals
         self.setup_socket()
             
     def render(self):
