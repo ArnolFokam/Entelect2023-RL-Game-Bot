@@ -29,10 +29,13 @@ class CNN(nn.Module):
         
         # the scaling for the feature map
         scaling = (2 ** len(arch_cfg.filters))
+        feature_map_size = arch_cfg.filters[-1] * (input_shape[1] // scaling) * (input_shape[2] // scaling)
+        
+        assert feature_map_size > 0
         
         # build the fully connected layers
         self.mlp = layer_init(nn.Linear(
-            arch_cfg.filters[-1] * (input_shape[1] // scaling) * (input_shape[2] // scaling), 
+            feature_map_size, 
             output_shape[0]), std=0.01)
         
     def _get_conv_layer(self, in_channels, out_channels):
