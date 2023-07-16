@@ -127,6 +127,7 @@ class PPO(BaseAgent):
             
             # optimize actor
             actor_loss = []
+            entropy_loss = []
             for _ in range(self.cfg.max_actor_train_iterations):
                 
                 new_actions_logits = self.actor_network(states)
@@ -140,8 +141,13 @@ class PPO(BaseAgent):
                 )
 
                 # clipped loss
-                loss = -torch.min(policy_ratio * advantage_estimates,  clipped_ratio * advantage_estimates).mean()
-                actor_loss.append(loss.item())
+                clipped_loss = -torch.min(policy_ratio * advantage_estimates,  clipped_ratio * advantage_estimates).mean()
+                entropy = action_dist.entropy().mean()
+                
+                actor_loss.append(clipped_loss.item())
+                entropy_loss.append(entropy.item())
+                
+                loss = clipped_loss - self.cfg.entropy_coefficient * entropy
                 
                 # backpop through actor
                 actor_optimizer.zero_grad()
@@ -171,6 +177,7 @@ class PPO(BaseAgent):
                 logs["train-episode-reward"] = ep_rewards
                 logs["train-actor-loss"] = np.mean(actor_loss)
                 logs["train-critic-loss"] = np.mean(critic_loss)
+                logs["train-actor-entropy"] = np.mean(entropy_loss)
                 
             if (i_episode + 1) % self.cfg.eval_every_episodes == 0:
                 mean_rwd, _, min_bv_frames, max_bv_frames = self.evaluate(return_frames=True)

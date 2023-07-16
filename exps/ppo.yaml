@@ -8,6 +8,7 @@ actor_learning_rate: 1e-4
 critic_learning_rate: 1e-3
 decay: 0.97 # general advantage estimate
 ppo_clip_val: 0.2
+entropy_coefficient: 0.01
 target_kl_divergence: 0.03
 max_actor_train_iterations: 5
 critic_train_iterations: 10
