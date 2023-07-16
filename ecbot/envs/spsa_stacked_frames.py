@@ -109,3 +109,24 @@ class SinglePlayerSingleAgentStackedFramesEnvV2(SinglePlayerSingleAgentStackedFr
                 self.observation[3:], 
                 [np.array(game_state[Constants.HERO_WINDOW], dtype=np.float32) / 6.0]
             ], axis=0)
+            
+class SinglePlayerSingleAgentStackedFramesEnvV3(SinglePlayerSingleAgentStackedFramesEnvV2):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+    def step(self, action: int):
+        self.game_has_reset = False
+        
+        # command from the  game server are 1-indexed
+        self.game_client.send_player_command(int(action + 1))
+        self._wait_for_game_state()
+        
+        self.observation, self.info, done = self._return_env_state()
+        
+        reward, was_on_bad_floor = self.reward_fn(self.info, )
+        
+        self.past_k_rewards.append(reward)
+        print(f"reward: {reward}, mean: {np.mean(self.past_k_rewards)}")
+        done = done or was_on_bad_floor or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
+        
+        return self.observation, reward, done, self.info
