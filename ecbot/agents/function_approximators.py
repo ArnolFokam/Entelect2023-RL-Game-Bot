@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Optional
+from omegaconf import ListConfig
 
 import torch
 import torch.nn as nn
@@ -12,26 +12,36 @@ def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
 class CNN(nn.Module):
     def __init__(self, arch_cfg, input_shape, output_shape, *args, **kwargs):
         
-        assert isinstance(arch_cfg.filters, list) and len(arch_cfg.filters) > 0
+        assert isinstance(arch_cfg.filters, (list, ListConfig)) and len(arch_cfg.filters) > 0
         assert len(input_shape) == 3
         assert len(output_shape) == 1
         
         super().__init__()  
         
-        # Build the CNN
+        # build the CNN
         cnn_layers = [*self._get_conv_layer(input_shape[0], arch_cfg.filters[0])]
         
+        # build successive layers of convolution
         for i in range(len(arch_cfg.filters) - 1):
             cnn_layers.extend(self._get_conv_layer(arch_cfg.filters[i], arch_cfg.filters[i+1]))
         
         self.cnn = nn.Sequential(*cnn_layers)
         
-        # Build the fully connected layers
-        self.mlp = layer_init(nn.Linear(arch_cfg.filters[-1] * 4 * 4, output_shape[0]), std=0.01)
+        # the scaling for the feature map
+        scaling = (2 ** len(arch_cfg.filters))
+        feature_map_size = arch_cfg.filters[-1] * (input_shape[1] // scaling) * (input_shape[2] // scaling)
         
-    def _get_conv_layer(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1):
+        assert feature_map_size > 0
+        
+        # build the fully connected layers
+        self.mlp = layer_init(nn.Linear(
+            feature_map_size, 
+            output_shape[0]), std=0.01)
+        
+    def _get_conv_layer(self, in_channels, out_channels):
+        # every layers reduces the size of the input by half
         return [
-            nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, stride=stride, padding=padding),
+            nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         ]
