@@ -1,0 +1,55 @@
+hydra:
+  sweep:
+    subdir: ${hydra.job.override_dirname}
+
+# experiment
+project: ECBOT-test
+
+# servers
+game_server_port: 5000
+viz_server_port: 6000
+
+# environment
+env_name: spsa_stacked
+num_frames: 3
+render_mode:
+past_reward_threshold: -100000000
+reward_backup_len: 100
+
+# agent
+gamma: 0.9997
+max_train_steps: 200
+num_episodes: 5000
+
+# logging
+log_every_episodes: 10
+
+# reward
+reward_fn: coins_on_platform
+
+# rewards
+step_penalty: -0.5
+on_bad_floor_penalty: -100.0
+less_coin_penalty_multiplier: 1
+
+# penalties
+on_good_floor_reward: 0
+more_coin_reward_multiplier: 8
+initial_position_reward: 0
+
+# others
+good_floors:
+  - 4
+  - 5
+
+bad_floors:
+  - 1
+
+position_reward_decay_factor: 0.0
+
+# evaluation
+n_eval_episodes: 10
+max_eval_steps: 200
+eval_every_episodes: 200
+
+seed: 1

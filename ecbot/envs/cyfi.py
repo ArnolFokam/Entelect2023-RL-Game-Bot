@@ -205,11 +205,6 @@ class CyFi(gym.Env):
     
     def reset(self):
         self.game_client.new_game()
-            
-        # TODO: handle the case the when the game is full of players
-        # you could for example throw an error or restart the game
-        # what might be nice is to ask for user input about that
-        # but only when when doing interactive training.
         
         self._wait_for_game_state()
         self.observation, self.info, _ = self._return_env_state()
