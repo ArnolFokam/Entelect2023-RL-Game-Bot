@@ -22,7 +22,7 @@ max_train_steps: 150
 num_episodes: 2500
 
 # logging
-log_every_episodes: 10
+log_every_episodes: 5
 
 # reward
 reward_fn: coins_on_platform
