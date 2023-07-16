@@ -37,28 +37,30 @@ class SinglePlayerSingleAgentStackedFramesEnv(CyFi):
         self.past_k_rewards = deque([], maxlen=self.cfg.reward_backup_len)
         
         self.game_has_reset = False
-
-
+        
+    def reset(self):
+        self.game_has_reset = True
+        
+        observation = super().reset()
+        self.past_k_rewards = deque([], maxlen=self.cfg.reward_backup_len)
+        self.reward_fn.reset(self.info)
+        return observation
+    
     def step(self, action: int):
+        self.game_has_reset = False
         
         # command from the  game server are 1-indexed
         self.game_client.send_player_command(int(action + 1))
         self._wait_for_game_state()
         
         self.observation, self.info, done = self._return_env_state()
-        reward, _ = self.reward_fn(self.info)
+        
+        reward, was_on_bad_floor = self.reward_fn(self.info, )
         
         self.past_k_rewards.append(reward)
         print(f"reward: {reward}, mean: {np.mean(self.past_k_rewards)}")
-        done = done or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
+        done = was_on_bad_floor or done or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
         return self.observation, reward, done, self.info
-    
-    def reset(self):
-        self.game_has_reset = True
-        observation = super().reset()
-        self.past_k_rewards = deque([], maxlen=self.cfg.reward_backup_len)
-        self.reward_fn.reset(self.info)
-        return observation
         
     def _get_observation(self, game_state):
         if self.game_has_reset:
