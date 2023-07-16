@@ -100,13 +100,28 @@ namespace CyFi
         ){
             GameSettings = settings.Value;
             cloudSeed = Environment.GetEnvironmentVariable("WORLD_SEED") ?? "0";
-            GameSettings.Levels.ForEach(level => level.Seed = int.Parse(cloudSeed) + level.Seed);
+
+            Random _rand = new Random();
+
+            // instead of using constant seed
+            // GameSettings.Levels.ForEach(level => level.Seed = int.Parse(cloudSeed) + level.Seed);
+
+            // use random seed
+            GameSettings.Levels.ForEach(level => level.Seed = int.Parse(cloudSeed) + _rand.Next());
+
 
             levels = new();
-            for (int level = 0; level < GameSettings.Levels.Count; level++)
-            {
-                levels.Add(worldFactory.CreateWorld(GameSettings.Levels[level], level));
+
+            // generate levels randomly
+            List<int> levels_idx = Enumerable.Range(0, GameSettings.Levels.Count).ToList();
+
+            levels_idx = levels_idx.OrderBy(_ => _rand.Next()).ToList();
+
+            for (int level = 0; level < GameSettings.Levels.Count; level++){
+
+                levels.Add(worldFactory.CreateWorld(GameSettings.Levels[level], levels_idx[level]));
                 advances[level] = 0;
+
             }
 
             cyFiState = new CyFiState(

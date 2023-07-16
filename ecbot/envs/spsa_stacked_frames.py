@@ -44,6 +44,7 @@ class SinglePlayerSingleAgentStackedFramesEnv(CyFi):
         observation = super().reset()
         self.past_k_rewards = deque([], maxlen=self.cfg.reward_backup_len)
         self.reward_fn.reset(self.info)
+        
         return observation
     
     def step(self, action: int):
@@ -55,11 +56,12 @@ class SinglePlayerSingleAgentStackedFramesEnv(CyFi):
         
         self.observation, self.info, done = self._return_env_state()
         
-        reward, was_on_bad_floor = self.reward_fn(self.info, )
+        reward, _ = self.reward_fn(self.info, )
         
         self.past_k_rewards.append(reward)
         print(f"reward: {reward}, mean: {np.mean(self.past_k_rewards)}")
-        done = was_on_bad_floor or done or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
+        done = done or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
+        
         return self.observation, reward, done, self.info
         
     def _get_observation(self, game_state):
@@ -84,3 +86,26 @@ class SinglePlayerSingleAgentStackedFramesEnv(CyFi):
             "collected": game_state[Constants.COLLECTED],
             "current_level": game_state[Constants.CURRENT_LEVEL]
         }
+        
+class SinglePlayerSingleAgentStackedFramesEnvV2(SinglePlayerSingleAgentStackedFramesEnv):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.observation_space = spaces.Box(low=0.0, high=1.0, shape=(self.cfg.num_frames + 2, 34, 22), dtype=float)
+        
+    def _get_observation(self, game_state):
+        if self.game_has_reset:
+            # use the start frame in all frames
+            window = np.array([game_state[Constants.HERO_WINDOW]] * self.cfg.num_frames, dtype=np.float32) / 6.0
+            return np.concatenate([
+                [np.full_like(window[0], fill_value=game_state[Constants.POSITION_X]) / 1000.0],
+                [np.full_like(window[0], fill_value=game_state[Constants.POSITION_Y]) / 1000.0],
+                window
+            ], axis=0)
+        else:
+            # enqueue the current frame and dequeue the oldest frame
+            return np.concatenate([
+                [np.full_like(self.observation[0], fill_value=game_state[Constants.POSITION_X]) / 1000.0],
+                [np.full_like(self.observation[0], fill_value=game_state[Constants.POSITION_Y]) / 1000.0],
+                self.observation[3:], 
+                [np.array(game_state[Constants.HERO_WINDOW], dtype=np.float32) / 6.0]
+            ], axis=0)
