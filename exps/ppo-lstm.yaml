@@ -1,0 +1,32 @@
+defaults:
+  - spsa-stacked
+  - _self_
+
+# agent
+agent_name: ppo_lstm
+actor_learning_rate: 1e-4
+critic_learning_rate: 1e-3
+decay: 0.97 # general advantage estimate
+ppo_clip_val: 0.2
+entropy_coefficient: 0.01
+target_kl_divergence: 0.03
+max_actor_train_iterations: 5
+critic_train_iterations: 10
+
+# actor network architecture
+actor:
+  # approximator: mlp
+  # num_hidden_layers: 3
+  # hidden_dim: 64
+  approximator: cnn_lstm
+  hidden_dim: 64
+  filters: [32, 32, 64]
+
+# value network architecture
+critic:
+  # approximator: mlp
+  # num_hidden_layers: 1
+  # hidden_dim: 64
+  approximator: cnn_lstm
+  hidden_dim: 64
+  filters: [32]

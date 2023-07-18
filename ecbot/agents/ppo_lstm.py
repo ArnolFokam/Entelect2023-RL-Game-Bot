@@ -10,7 +10,7 @@ from ecbot.agents.function_approximators import function_approximators
 from ecbot.agents.base import BaseAgent
 
 
-class PPO(BaseAgent):
+class PPO_LSTM(BaseAgent):
     """Proximal Policy Optimization"""
     
     def __init__(self, *args, **kwargs) -> None:
@@ -18,8 +18,8 @@ class PPO(BaseAgent):
         
         self.steps_done = 0
         
-        assert not self.cfg.actor.approximator.endswith("lstm"), "LSTM in actor not supported for vanilla PPO"
-        assert not self.cfg.critic.approximator.endswith("lstm"), "LSTM in critic not supported for vanilla PPO"
+        assert self.cfg.actor.approximator.endswith("lstm"), "only LSTMs (in actor) supported for PPO-LSTM"
+        assert self.cfg.critic.approximator.endswith("lstm"), "only LSTMs (in critic) supported for vanilla PPO-LTSM"
         
         self.actor_network = function_approximators[self.cfg.actor.approximator](
             arch_cfg=self.cfg.actor,
@@ -62,6 +62,8 @@ class PPO(BaseAgent):
         return np.array(returns[::-1])
     
     def learn(self):
+        raise NotImplementedError("CNNLSTM not implemented yet")
+    
         # to device
         self.actor_network = self.actor_network.to(self.device)
         self.critic_network = self.critic_network.to(self.device) 

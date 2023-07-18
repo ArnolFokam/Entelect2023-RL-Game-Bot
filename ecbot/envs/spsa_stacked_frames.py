@@ -171,7 +171,7 @@ class SinglePlayerSingleAgentStackedFramesEnvV5(SinglePlayerSingleAgentStackedFr
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Our CiFy agent has 12 possible actions
+        # Our CiFy agent has 12 - 4 = 8 possible actions
         # UP - 1
         # DOWN- 2
         # LEFT - 3

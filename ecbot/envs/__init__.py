@@ -1,5 +1,5 @@
 from ecbot.envs.spsa import SinglePlayerSingleAgentEnv, SinglePlayerSingleAgentEnvV2
-from ecbot.envs.spsa_stacked_frames import SinglePlayerSingleAgentStackedFramesEnv, SinglePlayerSingleAgentStackedFramesEnvV2, SinglePlayerSingleAgentStackedFramesEnvV3
+from ecbot.envs.spsa_stacked_frames import SinglePlayerSingleAgentStackedFramesEnvV4, SinglePlayerSingleAgentStackedFramesEnvV5, SinglePlayerSingleAgentStackedFramesEnv, SinglePlayerSingleAgentStackedFramesEnvV2, SinglePlayerSingleAgentStackedFramesEnvV3
 
 
 environments = {
@@ -17,4 +17,10 @@ environments = {
     
     # stacked observation, ends on floor, position in state
     "spsa_stacked_v3": SinglePlayerSingleAgentStackedFramesEnvV3,
+    
+    # stacked observation, ends on floor, reduced action space
+    "spsa_stacked_v4": SinglePlayerSingleAgentStackedFramesEnvV4,
+    
+    # stacked observation, ends on floor, reduced action space + one no action
+    "spsa_stacked_v5": SinglePlayerSingleAgentStackedFramesEnvV5,
 }

@@ -18,6 +18,8 @@ class CNN(nn.Module):
         
         super().__init__()  
         
+        self.arch_cfg = arch_cfg
+        
         # build the CNN
         cnn_layers = [*self._get_conv_layer(input_shape[0], arch_cfg.filters[0])]
         
@@ -29,13 +31,13 @@ class CNN(nn.Module):
         
         # the scaling for the feature map
         scaling = (2 ** len(arch_cfg.filters))
-        feature_map_size = arch_cfg.filters[-1] * (input_shape[1] // scaling) * (input_shape[2] // scaling)
+        self.feature_map_size = arch_cfg.filters[-1] * (input_shape[1] // scaling) * (input_shape[2] // scaling)
         
-        assert feature_map_size > 0
+        assert self.feature_map_size > 0
         
         # build the fully connected layers
         self.mlp = layer_init(nn.Linear(
-            feature_map_size, 
+            self.feature_map_size, 
             output_shape[0]), std=0.01)
         
     def _get_conv_layer(self, in_channels, out_channels):
@@ -62,6 +64,8 @@ class MLP(nn.Module):
         
         super().__init__()
         
+        self.arch_cfg = arch_cfg
+        
         # build the neural network of the policy network
         self.layers =  [] 
         
@@ -78,10 +82,33 @@ class MLP(nn.Module):
         
     def forward(self, x):
         return self.layers(x)
+    
+    
+class CNNLSTM(CNN):
+    def __init__(self, arch_cfg, input_shape, output_shape, *args, **kwargs):
+        super().__init__(arch_cfg, input_shape, output_shape, *args, **kwargs)
         
+        self.lstm = nn.LSTM(self.feature_map_size, arch_cfg.hidden_dim)
+        
+        # build the fully connected layers
+        self.mlp = layer_init(nn.Linear(
+            arch_cfg.hidden_dim,
+            output_shape[0]), std=0.01)
+        
+        self.hidden_state = None 
+        
+    def init_hidden_state(self, batch_size, device):
+        return (
+            torch.zeros(1, batch_size, self.arch_cfg.hidden_dim).to(device),
+            torch.zeros(1, batch_size, self.arch_cfg.hidden_dim).to(device)
+        )
+        
+    def forward(self, x):
+        raise NotImplementedError("CNNLSTM not implemented yet")
     
 
 function_approximators = {
     "mlp": MLP,
-    "cnn": CNN
+    "cnn": CNN,
+    "cnn_lstm": CNNLSTM,
 }
