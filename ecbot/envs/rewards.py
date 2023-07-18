@@ -56,6 +56,13 @@ class GetNewCoinsOnPlatform:
     def reset(self, info):
         self.last_collected = info["collected"]
         self.position_reward = defaultdict(lambda : self.cfg.initial_position_reward)
+        
+
+class GetNewCoinsOnPlatformV2(GetNewCoinsOnPlatform):
+    def __init__(self, cfg) -> None:
+        super().__init__(cfg)
+        
+        # TODO: search for a method to check if a hazard was touch with or without coins collected
 
 
 class NewPosition:

@@ -17,6 +17,7 @@ class Constants:
     HERO_WINDOW="heroWindow"
     POSITION_X="x"
     POSITION_Y="y"
+    WAITING_TIME=0.3
 
 @dataclass
 class State:
@@ -103,7 +104,7 @@ class CiFyClient:
             "Action" : action,                                   
             "BotId" : self.state.bot_id,
         }])
-        time.sleep(0.3)
+        time.sleep(Constants.WAITING_TIME)
         
     def register_new_player(self):
         # register new bot
@@ -111,20 +112,20 @@ class CiFyClient:
         token = os.getenv("Token") or os.getenv("REGISTRATION_TOKEN") or uuid.uuid1()
         bot_nickname = os.getenv("BOT_NICKNAME") or f"AAIIGBot-Wits"
         self.connection.send("Register", [str(token), bot_nickname])
-        time.sleep(0.3)
+        time.sleep(Constants.WAITING_TIME)
         
     def connect(self):
         # initiate connection with the game server
         print("Starting connection...")
         self.connection.start()
-        time.sleep(0.3)
+        time.sleep(Constants.WAITING_TIME)
         
     def disconnect(self):
         print("Disconnecting bot...")
         self.connection.stop()
-        time.sleep(0.3)
+        time.sleep(Constants.WAITING_TIME)
         
     def new_game(self):
         self.connection.send("RestartGame", [])
-        time.sleep(0.3)
+        time.sleep(Constants.WAITING_TIME)
         self.register_new_player()

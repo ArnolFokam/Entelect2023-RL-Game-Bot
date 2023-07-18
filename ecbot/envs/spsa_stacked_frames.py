@@ -1,3 +1,4 @@
+import time
 import numpy as np
 from collections import deque
 
@@ -130,3 +131,67 @@ class SinglePlayerSingleAgentStackedFramesEnvV3(SinglePlayerSingleAgentStackedFr
         done = done or was_on_bad_floor or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
         
         return self.observation, reward, done, self.info
+    
+class SinglePlayerSingleAgentStackedFramesEnvV4(SinglePlayerSingleAgentStackedFramesEnvV3):
+    """Reduces action space"""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Our CiFy agent has 12 - 4 = 8 possible actions
+        # UP - 1
+        # DOWN- 2
+        # LEFT - 3
+        # RIGHT - 4
+        # UPLEFT - 5
+        # UPRIGHT - 6
+        # DOWNLEFT - 7
+        # DOWNRIGHT - 8
+        # DIGDOWN - 9 # REMOVED
+        # DIGLEFT - 10 # REMOVED
+        # DIGRIGHT - 11 # REMOVED
+        # STEAL - 12  # REMOVED
+        self.action_space = gym.spaces.Discrete(8)
+        
+
+class SinglePlayerSingleAgentStackedFramesEnvV5(SinglePlayerSingleAgentStackedFramesEnvV3):
+    """Reduces action space"""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Our CiFy agent has 12 possible actions
+        # UP - 1
+        # DOWN- 2
+        # LEFT - 3
+        # RIGHT - 4
+        # UPLEFT - 5
+        # UPRIGHT - 6
+        # DOWNLEFT - 7
+        # DOWNRIGHT - 8
+        # DO_NOTHING - 9
+        # DIGDOWN - 9 # REMOVED
+        # DIGLEFT - 10 # REMOVED
+        # DIGRIGHT - 11 # REMOVED
+        # STEAL - 12  # REMOVED
+        self.action_space = gym.spaces.Discrete(9)
+        
+    def step(self, action: int):
+        self.game_has_reset = False
+        
+        if action in range(8):
+            # command from the  game server are 1-indexed
+            self.game_client.send_player_command(int(action + 1))
+        else:
+            time.spleep(Constants.WAITING_TIME + 0.1)
+    
+        self._wait_for_game_state()
+        
+        self.observation, self.info, done = self._return_env_state()
+        
+        reward, was_on_bad_floor = self.reward_fn(self.info, )
+        
+        self.past_k_rewards.append(reward)
+        print(f"reward: {reward}, mean: {np.mean(self.past_k_rewards)}")
+        done = done or was_on_bad_floor or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
+        
+        return self.observation, reward, done, self.info
+    
