@@ -85,6 +85,12 @@ class NewPosition:
         self.position_reward = defaultdict(lambda : self.cfg.initial_position_reward)
 
 reward_fn = {
+    # reward for new position
     "new_position": NewPosition,
-    "coins_on_platform": GetNewCoinsOnPlatform
+    
+    # reward for new coins, penalize on lost, coins, step penalty, reward on good floor, penalize on bad floor
+    "coins_on_platform": GetNewCoinsOnPlatform,
+    
+    # reward for new coins, penalize on [hazards touched], coins, step penalty, reward on good floor, penalize on bad floor
+    "coins_on_platform_v2": GetNewCoinsOnPlatformV2
 }

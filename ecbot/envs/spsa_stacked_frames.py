@@ -152,8 +152,21 @@ class SinglePlayerSingleAgentStackedFramesEnvV4(SinglePlayerSingleAgentStackedFr
         # STEAL - 12  # REMOVED
         self.action_space = gym.spaces.Discrete(8)
         
+        self.observation_space = spaces.Box(low=0.0, high=1.0, shape=(self.cfg.num_frames, 34, 22), dtype=float)
+        
+    def _get_observation(self, game_state):
+        if self.game_has_reset:
+            # use the start frame in all frames
+            return np.array([game_state[Constants.HERO_WINDOW]] * self.cfg.num_frames, dtype=np.float32) / 6.0
+        else:
+            # enqueue the current frame and dequeue the oldest frame
+            return np.concatenate([
+                self.observation[1:], [
+                    np.array(game_state[Constants.HERO_WINDOW], dtype=np.float32) / 6.0
+                ]], axis=0)
+        
 
-class SinglePlayerSingleAgentStackedFramesEnvV5(SinglePlayerSingleAgentStackedFramesEnvV3):
+class SinglePlayerSingleAgentStackedFramesEnvV5(SinglePlayerSingleAgentStackedFramesEnvV4):
     """Reduces action space"""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
