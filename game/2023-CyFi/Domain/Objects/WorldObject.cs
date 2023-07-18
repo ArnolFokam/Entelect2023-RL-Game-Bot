@@ -676,19 +676,23 @@ namespace Domain.Objects
         /// <param name="level"></param>
         private void GetStartingPoint(int level)
         {
-            Point location = new(0, 0);
-            switch (level)
-            {
-                case 2:
-                    location = new Point(width, 0);
-                    break;
-                case 3:
-                case 4:
-                    location = new Point(width / 2, height / 2);
-                    break;
-                default:
-                    break;
-            }
+            // Point location = new(0, 0);
+            // switch (level)
+            // {
+            //     case 2:
+            //         location = new Point(width, 0);
+            //         break;
+            //     case 3:
+            //     case 4:
+            //         location = new Point(width / 2, height / 2);
+            //         break;
+            //     default:
+            //         break;
+            // }
+
+            // generate random point on the map
+            Random random = new Random();
+            Point location = new(random.Next(width), random.Next(height));
 
             Tuple<int, int> startingPoint = randomPaths.SelectMany(p => p).OrderBy(pathPoint => Math.Pow(location.X - pathPoint.Item1, 2) + Math.Pow(location.Y - pathPoint.Item2, 2)).First();
 
