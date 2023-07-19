@@ -89,8 +89,9 @@ class PPO(BaseAgent):
                 obs = torch.tensor(np.array([state]), dtype=torch.float32, device=self.device)
                 
                 # get the  action and value for that state
-                action, action_log_prob = self._select_action(obs)
-                value = self.critic_network(obs).item()
+                with torch.no_grad():
+                    action, action_log_prob = self._select_action(obs)
+                    value = self.critic_network(obs).item()
                 
                 next_state, reward, done, _ = self.env.step(action)
                 

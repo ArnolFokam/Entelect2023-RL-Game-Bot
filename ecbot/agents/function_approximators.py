@@ -95,16 +95,21 @@ class CNNLSTM(CNN):
             arch_cfg.hidden_dim,
             output_shape[0]), std=0.01)
         
-        self.hidden_state = None 
-        
     def init_hidden_state(self, batch_size, device):
         return (
             torch.zeros(1, batch_size, self.arch_cfg.hidden_dim).to(device),
             torch.zeros(1, batch_size, self.arch_cfg.hidden_dim).to(device)
         )
         
-    def forward(self, x):
-        raise NotImplementedError("CNNLSTM not implemented yet")
+    def forward(self, x, hidden_state):
+        x = self.cnn(x)
+        x = x.view(x.size(0), -1)
+        x, hidden_state = self.lstm(
+            x.unsqueeze(0), 
+            (hidden_state[0].contiguous(), hidden_state[1].contiguous())
+        )
+        x = self.mlp(x.squeeze(0))
+        return x, hidden_state
     
 
 function_approximators = {
