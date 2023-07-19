@@ -82,7 +82,8 @@ class SinglePlayerSingleAgentEnvV2(SinglePlayerSingleAgentEnv):
         
         self.observation, self.info, done = self._return_env_state()
         
-        reward, was_on_bad_floor = self.reward_fn(self.info, )
+        reward, reward_events = self.reward_fn(self.info, )
+        was_on_bad_floor = reward_events["on_bad_floor"]
         
         self.past_k_rewards.append(reward)
         print(f"reward: {reward}, mean: {np.mean(self.past_k_rewards)}")

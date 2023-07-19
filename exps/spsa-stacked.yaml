@@ -10,7 +10,7 @@ game_server_port: 5000
 viz_server_port: 6000
 
 # environment
-env_name: spsa_stacked_v3
+env_name: spsa_stacked_v4
 num_frames: 3
 render_mode:
 past_reward_threshold: -100000000
@@ -36,6 +36,9 @@ less_coin_penalty_multiplier: 5
 on_good_floor_reward: 0
 more_coin_reward_multiplier: 40
 initial_position_reward: 0
+
+# termination
+terminate_on_bad_floor: true
 
 # others
 good_floors:

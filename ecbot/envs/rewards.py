@@ -20,6 +20,7 @@ class GetNewCoinsOnPlatform:
         reward = self.cfg.step_penalty
         
         was_on_bad_floor = False
+        terminate_event_occured = False
         
         # -/+ ve reward for collection or lost
         coin_difference = info["collected"] - self.last_collected
@@ -50,7 +51,10 @@ class GetNewCoinsOnPlatform:
         # decay the reward
         self.position_reward[position] = reward * self.cfg.position_reward_decay_factor
         
-        return reward, was_on_bad_floor
+        if self.cfg.terminate_on_bad_floor:
+            terminate_event_occured = terminate_event_occured or was_on_bad_floor
+        
+        return reward, terminate_event_occured
         
     
     def reset(self, info):
@@ -62,7 +66,25 @@ class GetNewCoinsOnPlatformV2(GetNewCoinsOnPlatform):
     def __init__(self, cfg) -> None:
         super().__init__(cfg)
         
-        # TODO: search for a method to check if a hazard was touch with or without coins collected
+        self.last_state = None
+        
+    def __call__(self, info) -> Any:
+        reward, terminate_event_occured = super().__call__(info)
+        
+        # TODO: identify what reliably changes when a hazard 
+        # is touched and use that to penalize of terminate
+        
+        # ideas
+        # 1. check the difference in the new and initial position
+        
+        hazard_touched = False
+        
+        # check if hazard was touched
+        
+        if self.cfg.terminate_on_hazard_touched:
+            terminate_event_occured = terminate_event_occured or hazard_touched
+            
+        return reward, terminate_event_occured
 
 
 class NewPosition:
@@ -79,7 +101,7 @@ class NewPosition:
         # decay the reward
         self.position_reward[position] = reward * self.cfg.position_reward_decay_factor
         
-        return reward
+        return reward, False
     
     def reset(self, *args, **kwargs):
         self.position_reward = defaultdict(lambda : self.cfg.initial_position_reward)
@@ -88,9 +110,18 @@ reward_fn = {
     # reward for new position
     "new_position": NewPosition,
     
-    # reward for new coins, penalize on lost, coins, step penalty, reward on good floor, penalize on bad floor
+    # reward for new coins
+    # penalize on lost coins
+    # step penalty
+    # reward on good floor
+    # penalize on bad floor
     "coins_on_platform": GetNewCoinsOnPlatform,
     
-    # reward for new coins, penalize on [hazards touched], coins, step penalty, reward on good floor, penalize on bad floor
+    # reward for new coins 
+    # penalize on lost coins
+    # penalize on hazards touched
+    # step penalty 
+    # reward on good floor 
+    # penalize on bad floor
     "coins_on_platform_v2": GetNewCoinsOnPlatformV2
 }

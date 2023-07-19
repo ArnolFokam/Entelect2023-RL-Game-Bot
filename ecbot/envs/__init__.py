@@ -6,21 +6,21 @@ environments = {
     # flattened state
     "spsa": SinglePlayerSingleAgentEnv,
     
-    # flattened state, ends on floor
+    # flattened state
     "spsa_v2": SinglePlayerSingleAgentEnvV2,
     
-    # stacked observation, does not on floor
+    # stacked observation
     "spsa_stacked": SinglePlayerSingleAgentStackedFramesEnv,
     
-    # stacked observation, does not on floor, position in state
+    # stacked observation, position in state
     "spsa_stacked_v2": SinglePlayerSingleAgentStackedFramesEnvV2,
     
-    # stacked observation, ends on floor, position in state
+    # [WARNING: this is no more supported] stacked observation, position in state 
     "spsa_stacked_v3": SinglePlayerSingleAgentStackedFramesEnvV3,
     
-    # stacked observation, ends on floor, reduced action space
+    # stacked observation, reduced action space
     "spsa_stacked_v4": SinglePlayerSingleAgentStackedFramesEnvV4,
     
-    # stacked observation, ends on floor, reduced action space + one no action
+    # stacked observation, reduced action space + one no action
     "spsa_stacked_v5": SinglePlayerSingleAgentStackedFramesEnvV5,
 }

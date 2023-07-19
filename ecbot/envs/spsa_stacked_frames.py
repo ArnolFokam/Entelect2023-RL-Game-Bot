@@ -57,11 +57,11 @@ class SinglePlayerSingleAgentStackedFramesEnv(CyFi):
         
         self.observation, self.info, done = self._return_env_state()
         
-        reward, _ = self.reward_fn(self.info, )
+        reward, terminate_event_occured = self.reward_fn(self.info, )
         
         self.past_k_rewards.append(reward)
         print(f"reward: {reward}, mean: {np.mean(self.past_k_rewards)}")
-        done = done or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
+        done = done or terminate_event_occured or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
         
         return self.observation, reward, done, self.info
         
@@ -111,28 +111,14 @@ class SinglePlayerSingleAgentStackedFramesEnvV2(SinglePlayerSingleAgentStackedFr
                 [np.array(game_state[Constants.HERO_WINDOW], dtype=np.float32) / 6.0]
             ], axis=0)
             
-class SinglePlayerSingleAgentStackedFramesEnvV3(SinglePlayerSingleAgentStackedFramesEnvV2):
+class SinglePlayerSingleAgentStackedFramesEnvV3(SinglePlayerSingleAgentStackedFramesEnv):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
     def step(self, action: int):
-        self.game_has_reset = False
-        
-        # command from the  game server are 1-indexed
-        self.game_client.send_player_command(int(action + 1))
-        self._wait_for_game_state()
-        
-        self.observation, self.info, done = self._return_env_state()
-        
-        reward, was_on_bad_floor = self.reward_fn(self.info, )
-        
-        self.past_k_rewards.append(reward)
-        print(f"reward: {reward}, mean: {np.mean(self.past_k_rewards)}")
-        done = done or was_on_bad_floor or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
-        
-        return self.observation, reward, done, self.info
+        raise ValueError("This environment is no more  supported")
     
-class SinglePlayerSingleAgentStackedFramesEnvV4(SinglePlayerSingleAgentStackedFramesEnvV3):
+class SinglePlayerSingleAgentStackedFramesEnvV4(SinglePlayerSingleAgentStackedFramesEnv):
     """Reduces action space"""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -154,19 +140,8 @@ class SinglePlayerSingleAgentStackedFramesEnvV4(SinglePlayerSingleAgentStackedFr
         
         self.observation_space = spaces.Box(low=0.0, high=1.0, shape=(self.cfg.num_frames, 34, 22), dtype=float)
         
-    def _get_observation(self, game_state):
-        if self.game_has_reset:
-            # use the start frame in all frames
-            return np.array([game_state[Constants.HERO_WINDOW]] * self.cfg.num_frames, dtype=np.float32) / 6.0
-        else:
-            # enqueue the current frame and dequeue the oldest frame
-            return np.concatenate([
-                self.observation[1:], [
-                    np.array(game_state[Constants.HERO_WINDOW], dtype=np.float32) / 6.0
-                ]], axis=0)
-        
 
-class SinglePlayerSingleAgentStackedFramesEnvV5(SinglePlayerSingleAgentStackedFramesEnvV4):
+class SinglePlayerSingleAgentStackedFramesEnvV5(SinglePlayerSingleAgentStackedFramesEnv):
     """Reduces action space"""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -200,11 +175,11 @@ class SinglePlayerSingleAgentStackedFramesEnvV5(SinglePlayerSingleAgentStackedFr
         
         self.observation, self.info, done = self._return_env_state()
         
-        reward, was_on_bad_floor = self.reward_fn(self.info, )
+        reward, terminate_event_occured = self.reward_fn(self.info, )
         
         self.past_k_rewards.append(reward)
         print(f"reward: {reward}, mean: {np.mean(self.past_k_rewards)}")
-        done = done or was_on_bad_floor or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
+        done = done or terminate_event_occured or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
         
         return self.observation, reward, done, self.info
     

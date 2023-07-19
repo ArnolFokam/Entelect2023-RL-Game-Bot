@@ -36,6 +36,9 @@ on_good_floor_reward: 0
 more_coin_reward_multiplier: 8
 initial_position_reward: 0
 
+# termination
+terminate_on_bad_floor: true
+
 # others
 good_floors:
   - 4
