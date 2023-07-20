@@ -71,6 +71,7 @@ namespace CyFi.Physics
             {
                 hero.XPosition = world.start.X;
                 hero.YPosition = world.start.Y;
+                hero.HazardsHit += 1;
             }
 
         }
