@@ -20,7 +20,7 @@ namespace CyFi.Entity
 
         public int TimesDug { get; set; } = 0;
 
-        public int HazardsHit { get; set; } = 0;
+        public int HazardsHits { get; set; } = 0;
 
         public MovementSM MovementSm { get; set; }
         public List<Movements.RangeData> radarData { get; set; }

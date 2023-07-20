@@ -17,6 +17,7 @@ class Constants:
     HERO_WINDOW="heroWindow"
     POSITION_X="x"
     POSITION_Y="y"
+    HazardsHits="hazardsHits"
     WAITING_TIME=0.3
 
 @dataclass

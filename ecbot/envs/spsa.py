@@ -61,7 +61,7 @@ class SinglePlayerSingleAgentEnv(CyFi):
         return np.array(game_state[Constants.HERO_WINDOW], dtype=np.uint8).flatten() / 6.0
         
     def _get_info(self, game_state):
-        return {
+        info =  {
             "position": (
                 game_state[Constants.POSITION_X],
                 game_state[Constants.POSITION_Y],
@@ -69,8 +69,15 @@ class SinglePlayerSingleAgentEnv(CyFi):
             "window": np.rot90(game_state[Constants.HERO_WINDOW]),
             "elapsed_time": game_state[Constants.ELAPSED_TIME],
             "collected": game_state[Constants.COLLECTED],
-            "current_level": game_state[Constants.CURRENT_LEVEL]
+            "current_level": game_state[Constants.CURRENT_LEVEL],
+            "hazards_hits": 0,
         }
+        
+        # custom info (add for reward function)
+        if Constants.HazardsHits in game_state:
+            info["hazards_hits"] = game_state[Constants.HazardsHits]
+                       
+        return info
 
 class SinglePlayerSingleAgentEnvV2(SinglePlayerSingleAgentEnv):
     

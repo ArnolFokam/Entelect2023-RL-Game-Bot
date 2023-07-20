@@ -71,20 +71,25 @@ class GetNewCoinsOnPlatformV2(GetNewCoinsOnPlatform):
     def __call__(self, info) -> Any:
         reward, terminate_event_occured = super().__call__(info)
         
-        # TODO: identify what reliably changes when a hazard 
-        # is touched and use that to penalize of terminate
-        
-        # ideas
-        # 1. check the difference in the new and initial position
-        
         hazard_touched = False
+        if self.last_state is not None:
+            hazard_touched = info["hazards_hits"] > self.last_state["hazards_hits"]
+            
+        self.last_state = info
+        
+        # give penalty for touching hazard
+        if hazard_touched:
+            reward += self.cfg.hazard_touched_penalty
         
         # check if hazard was touched
-        
         if self.cfg.terminate_on_hazard_touched:
             terminate_event_occured = terminate_event_occured or hazard_touched
             
         return reward, terminate_event_occured
+    
+    def reset(self, info):
+        super().reset(info)
+        self.last_state = None
 
 
 class NewPosition:
