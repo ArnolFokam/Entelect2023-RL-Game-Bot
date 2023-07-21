@@ -1,7 +1,7 @@
 project: ECBOT
 game_server_port: 5004
 viz_server_port: 6000
-env_name: spsa_stacked_v3
+env_name: spsa_stacked_v2
 num_frames: 3
 render_mode: null
 past_reward_threshold: -100000000
@@ -13,6 +13,9 @@ log_every_episodes: 5
 reward_fn: coins_on_platform
 step_penalty: -0.05
 on_bad_floor_penalty: -50.0
+hazard_touched_penalty: -50.0
+terminate_on_bad_floor: true
+terminate_on_hazard_touched: false
 less_coin_penalty_multiplier: 5
 on_good_floor_reward: 0
 more_coin_reward_multiplier: 40
