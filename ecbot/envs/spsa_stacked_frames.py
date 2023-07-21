@@ -39,10 +39,12 @@ class SinglePlayerSingleAgentStackedFramesEnv(CyFi):
         
         self.game_has_reset = False
         
-    def reset(self):
+    def reset(self, *args, **kwargs):
+        # should be before the call of the super
         self.game_has_reset = True
         
-        observation = super().reset()
+        observation = super().reset(*args, **kwargs)
+        
         self.past_k_rewards = deque([], maxlen=self.cfg.reward_backup_len)
         self.reward_fn.reset(self.info)
         
