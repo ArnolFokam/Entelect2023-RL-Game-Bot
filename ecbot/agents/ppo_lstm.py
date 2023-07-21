@@ -99,7 +99,8 @@ class PPO_LSTM(BaseAgent):
                     value, actor_hidden_state = self.critic_network(obs, critic_hidden_state)
                     value = value.item()
                 
-                next_state, reward, done, _ = self.env.step(action)
+                next_state, reward, done, truncated, _ = self.env.step(action.item())
+                done = done or truncated
                 
                 # training viz
                 frame = self.env.render()

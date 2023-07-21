@@ -65,7 +65,7 @@ def play(cfg: DictConfig) -> None:
 
         if supported_input is not None:
             # action = env.action_space.sample()
-            _, _, done, _ = env.step(supported_input)
+            _, _, done, _, _ = env.step(supported_input)
         
         env.render()
         

@@ -93,7 +93,8 @@ class PPO(BaseAgent):
                     action, action_log_prob = self._select_action(obs)
                     value = self.critic_network(obs).item()
                 
-                next_state, reward, done, _ = self.env.step(action)
+                next_state, reward, done, truncated, _ = self.env.step(action)
+                done = done or truncated
                 
                 # training viz
                 frame = self.env.render()

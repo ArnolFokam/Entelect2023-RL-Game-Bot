@@ -81,7 +81,8 @@ class DQN(BaseAgent):
             
             for _ in range(self.cfg.max_train_steps):
                 action = self._select_action(state)
-                observation, reward, done, _ = self.env.step(action.item())
+                observation, reward, done, truncated, _ = self.env.step(action.item())
+                done = done or truncated
                 reward = torch.tensor([reward], device=self.device)
                 
                 # training viz

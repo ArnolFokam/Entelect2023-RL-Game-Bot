@@ -129,4 +129,3 @@ class CiFyClient:
     def new_game(self):
         self.connection.send("RestartGame", [])
         time.sleep(Constants.WAITING_TIME)
-        self.register_new_player()
