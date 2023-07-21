@@ -214,7 +214,7 @@ class PPO(BaseAgent):
         
         # load the network weights
         artifacts = torch.load(os.path.join(dir, "ppo.pt"))
-        agent.actor_network.load_state_dict(artifacts["actor_network"])
+        agent.actor_network.load_state_dict(artifacts["actor_network"], map_location=torch.device('cpu'))
         
         return agent
         

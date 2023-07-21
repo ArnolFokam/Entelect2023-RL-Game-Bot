@@ -217,7 +217,7 @@ class PPO_LSTM(BaseAgent):
         torch.save({
             "actor_network": self.actor_network.state_dict(),
             "critic_network": self.critic_network.state_dict(),
-        }, os.path.join(dir, "ppo.pt"))
+        }, os.path.join(dir, "ppo_lstm.pt"))
         
     @classmethod
     def load_trained_agent(cls, cfg, dir, env):
@@ -225,8 +225,8 @@ class PPO_LSTM(BaseAgent):
         agent = cls(cfg, env)
         
         # load the network weights
-        artifacts = torch.load(os.path.join(dir, "ppo.pt"))
-        agent.actor_network.load_state_dict(artifacts["actor_network"])
+        artifacts = torch.load(os.path.join(dir, "ppo_lstm.pt"))
+        agent.actor_network.load_state_dict(artifacts["actor_network"], map_location=torch.device('cpu'))
         
         return agent
         
