@@ -48,8 +48,8 @@ class SinglePlayerSingleAgentEnv(CyFi):
         
         self.past_k_rewards.append(reward)
         print(f"reward: {reward}, mean: {np.mean(self.past_k_rewards)}")
-        done = done or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
-        return self.observation, reward, done, self.info
+        truncated =  np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
+        return self.observation, reward, done, truncated, self.info
     
     def reset(self):
         observation = super().reset()
@@ -94,5 +94,5 @@ class SinglePlayerSingleAgentEnvV2(SinglePlayerSingleAgentEnv):
         
         self.past_k_rewards.append(reward)
         print(f"reward: {reward}, mean: {np.mean(self.past_k_rewards)}")
-        done = was_on_bad_floor or done or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
-        return self.observation, reward, done, self.info
+        truncated = was_on_bad_floor or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
+        return self.observation, reward, done, truncated, self.info

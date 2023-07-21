@@ -61,9 +61,8 @@ class SinglePlayerSingleAgentStackedFramesEnv(CyFi):
         
         self.past_k_rewards.append(reward)
         print(f"reward: {reward}, mean: {np.mean(self.past_k_rewards)}")
-        done = done or terminate_event_occured or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
-        
-        return self.observation, reward, done, self.info
+        truncated = terminate_event_occured or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
+        return self.observation, reward, done, truncated, self.info
         
     def _get_observation(self, game_state):
         if self.game_has_reset:
@@ -186,7 +185,7 @@ class SinglePlayerSingleAgentStackedFramesEnvV5(SinglePlayerSingleAgentStackedFr
         
         self.past_k_rewards.append(reward)
         print(f"reward: {reward}, mean: {np.mean(self.past_k_rewards)}")
-        done = done or terminate_event_occured or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
         
-        return self.observation, reward, done, self.info
+        truncated = terminate_event_occured or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
+        return self.observation, reward, done, truncated, self.info
     
