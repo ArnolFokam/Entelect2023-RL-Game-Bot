@@ -189,7 +189,7 @@ class DQN(BaseAgent):
         
         # load the network weights
         artifacts = torch.load(os.path.join(dir, "dqn.pt"))
-        agent.policy_network.load_state_dict(artifacts["target_network"])
+        agent.policy_network.load_state_dict(artifacts["target_network"], map_location=torch.device('cpu'))
         
         return agent
         
