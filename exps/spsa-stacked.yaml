@@ -10,18 +10,19 @@ game_server_port: 5000
 viz_server_port: 6000
 
 # environment
-env_name: spsa_v2
+env_name: spsa_stacked_v4
+num_frames: 3
 render_mode:
 past_reward_threshold: -100000000
 reward_backup_len: 100
 
 # agent
 gamma: 0.9997
-max_train_steps: 200
-num_episodes: 5000
+max_train_steps: 150
+num_episodes: 2500
 
 # logging
-log_every_episodes: 10
+log_every_episodes: 5
 
 # reward
 reward_fn: coins_on_platform_v2
@@ -39,6 +40,7 @@ initial_position_reward: 0
 
 # termination
 terminate_on_bad_floor: true
+terminate_on_hazard_touched: true
 
 # others
 good_floors:
@@ -52,7 +54,7 @@ position_reward_decay_factor: 0.0
 
 # evaluation
 n_eval_episodes: 10
-max_eval_steps: 200
-eval_every_episodes: 200
+max_eval_steps: 150
+eval_every_episodes: 250
 
 seed: 1

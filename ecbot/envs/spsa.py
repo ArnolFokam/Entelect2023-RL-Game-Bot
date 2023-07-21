@@ -31,7 +31,7 @@ class SinglePlayerSingleAgentEnv(CyFi):
         
         # Our CiFy agent only knows about its windowed view of the world
         # Note: the agent is at the center of the window
-        self.observation_space = spaces.Box(low=0, high=6, shape=(34 * 22,), dtype=int)
+        self.observation_space = spaces.Box(low=0.0, high=1.0, shape=(34 * 22,), dtype=float)
         
         self.reward_fn = reward_fn[self.cfg.reward_fn](self.cfg)
         self.past_k_rewards = deque([], maxlen=self.cfg.reward_backup_len) 
@@ -48,8 +48,8 @@ class SinglePlayerSingleAgentEnv(CyFi):
         
         self.past_k_rewards.append(reward)
         print(f"reward: {reward}, mean: {np.mean(self.past_k_rewards)}")
-        done = done or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
-        return self.observation, reward, done, self.info
+        truncated =  np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
+        return self.observation, reward, done, truncated, self.info
     
     def reset(self):
         observation = super().reset()
@@ -58,10 +58,10 @@ class SinglePlayerSingleAgentEnv(CyFi):
         return observation
         
     def _get_observation(self, game_state):
-        return np.array(game_state[Constants.HERO_WINDOW], dtype=np.uint8).flatten()
+        return np.array(game_state[Constants.HERO_WINDOW], dtype=np.uint8).flatten() / 6.0
         
     def _get_info(self, game_state):
-        return {
+        info =  {
             "position": (
                 game_state[Constants.POSITION_X],
                 game_state[Constants.POSITION_Y],
@@ -69,8 +69,15 @@ class SinglePlayerSingleAgentEnv(CyFi):
             "window": np.rot90(game_state[Constants.HERO_WINDOW]),
             "elapsed_time": game_state[Constants.ELAPSED_TIME],
             "collected": game_state[Constants.COLLECTED],
-            "current_level": game_state[Constants.CURRENT_LEVEL]
+            "current_level": game_state[Constants.CURRENT_LEVEL],
+            "hazards_hits": 0,
         }
+        
+        # custom info (add for reward function)
+        if Constants.HazardsHits in game_state:
+            info["hazards_hits"] = game_state[Constants.HazardsHits]
+                       
+        return info
 
 class SinglePlayerSingleAgentEnvV2(SinglePlayerSingleAgentEnv):
     
@@ -82,29 +89,10 @@ class SinglePlayerSingleAgentEnvV2(SinglePlayerSingleAgentEnv):
         
         self.observation, self.info, done = self._return_env_state()
         
-        reward, was_on_bad_floor = self.reward_fn(self.info, )
+        reward, reward_events = self.reward_fn(self.info, )
+        was_on_bad_floor = reward_events["on_bad_floor"]
         
         self.past_k_rewards.append(reward)
         print(f"reward: {reward}, mean: {np.mean(self.past_k_rewards)}")
-        done = was_on_bad_floor or done or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
-        return self.observation, reward, done, self.info
-    
-    def online_step(self, action: int):
-        # command from the  game server are 1-indexed
-        self.game_client.send_player_command(int(action + 1))
-        self._wait_for_game_state()
-        
-        self.observation, _, done = self._return_env_state()
-        
-        return self.observation, None, done, None
-    
-    def online_reset(self):
-        # register the new bot
-        self.game_client.register_new_player()
-        
-        # wait for game state
-        self._wait_for_game_state()
-        self.observation, _, done = self._return_env_state()
-        
-        # return state
-        return self.observation, done
+        truncated = was_on_bad_floor or np.mean(self.past_k_rewards) < self.cfg.past_reward_threshold
+        return self.observation, reward, done, truncated, self.info

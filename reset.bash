@@ -8,3 +8,4 @@ rm logs/*.log
 rm scheduled_0_private/* 
 rm scheduled_1_private/*
 rm scheduled_private/*
+rm -rf wandb/*

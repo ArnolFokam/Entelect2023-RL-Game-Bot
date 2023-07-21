@@ -45,7 +45,7 @@ class BaseAgent:
             
             for _ in range(self.cfg.max_eval_steps):
                 action = self.act(state)
-                state, reward, done, _ = self.env.step(action)
+                state, reward, done, _, _ = self.env.step(action)
                 state = torch.tensor(state, dtype=torch.float32, device=self.device).unsqueeze(0)
                 episode_reward += reward
                 

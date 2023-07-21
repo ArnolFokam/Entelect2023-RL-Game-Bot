@@ -1,3 +1,5 @@
+**Note:** Do all your dev work on the train branch.
+
 # Requires
 - Python 3.8.16
 - Docker

@@ -1,0 +1,47 @@
+project: ECBOT
+game_server_port: 5004
+viz_server_port: 6000
+env_name: spsa_stacked_v3
+num_frames: 3
+render_mode: null
+past_reward_threshold: -100000000
+reward_backup_len: 100
+gamma: 0.9997
+max_train_steps: 150
+num_episodes: 2500
+log_every_episodes: 5
+reward_fn: coins_on_platform
+step_penalty: -0.05
+on_bad_floor_penalty: -50.0
+less_coin_penalty_multiplier: 5
+on_good_floor_reward: 0
+more_coin_reward_multiplier: 40
+initial_position_reward: 0
+good_floors:
+- 4
+- 5
+bad_floors:
+- 1
+position_reward_decay_factor: 0.0
+n_eval_episodes: 10
+max_eval_steps: 150
+eval_every_episodes: 250
+seed: 1
+agent_name: ppo
+actor_learning_rate: 0.0001
+critic_learning_rate: 0.001
+decay: 0.97
+ppo_clip_val: 0.2
+entropy_coefficient: 0.001
+target_kl_divergence: 0.03
+max_actor_train_iterations: 5
+critic_train_iterations: 10
+actor:
+  approximator: cnn
+  filters:
+  - 32
+critic:
+  approximator: cnn
+  filters:
+  - 32
+  - 32

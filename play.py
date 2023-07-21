@@ -46,7 +46,7 @@ def check_keyboard_input():
 @hydra.main(version_base=None)
 def play(cfg: DictConfig) -> None:
     # Use a separate environement for evaluation
-    env = environments[cfg.env_name](cfg)
+    env = environments[cfg.env_name](cfg, run="play")
     env.reset()
     done = False
     
@@ -65,7 +65,7 @@ def play(cfg: DictConfig) -> None:
 
         if supported_input is not None:
             # action = env.action_space.sample()
-            _, _, done, _ = env.step(supported_input)
+            _, _, done, _, _ = env.step(supported_input)
         
         env.render()
         

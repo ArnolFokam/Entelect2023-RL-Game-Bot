@@ -26,7 +26,7 @@ def play(dir):
     
     # Use a separate environement for evaluation
     env = environments[cfg.env_name](cfg, run="online")
-    obs, done = env.online_reset()
+    obs, done = env.reset(online=True), False
     
     # load the model
     agent = agents[cfg.agent_name].load_trained_agent(cfg, dir, env)
@@ -36,7 +36,7 @@ def play(dir):
         while not done:
             obs = torch.tensor(np.array([obs]), dtype=torch.float32)
             action = agent.act(obs)
-            obs, _, done, _ = env.online_step(action)
+            obs, _, done, _, _ = env.step(action)
     except KeyboardInterrupt:
         env.game_client.disconnect()
         sys.exit(0)

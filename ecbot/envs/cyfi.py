@@ -48,6 +48,7 @@ class CyFi(gym.Env):
         self.sio = None
         self.socket_connected = False
         
+        # TODO: setup socket in another thread at regular intervals
         self.setup_socket()
             
     def render(self):
@@ -164,7 +165,7 @@ class CyFi(gym.Env):
         try:
             self.sio.connect(f'http://localhost:{self.cfg.viz_server_port}')
         except TypeError:
-            print('[INFO] Server is not initialized.')
+            print('socket server is not initialized.')
             self.socket_connected = False
     
     def send_frame_to_socket_server(self, frame):
@@ -190,7 +191,7 @@ class CyFi(gym.Env):
         # get observation and info
         self.observation = self._get_observation(game_state)
         self.info = self._get_info(game_state)
-        completed = self.game_client.state.game_completed
+        completed = self.game_client.state.game_completed or not self.game_client.state.connected
         
         return self.observation, self.info, completed
     
@@ -200,16 +201,14 @@ class CyFi(gym.Env):
     def _get_info(self,):
         raise NotImplementedError
     
-    def online_reset(self):
-        raise NotImplementedError
+    def reset(self, online = False):
     
-    def reset(self):
-        self.game_client.new_game()
+        if not online:
+            # restart game for local server
+            self.game_client.new_game()
             
-        # TODO: handle the case the when the game is full of players
-        # you could for example throw an error or restart the game
-        # what might be nice is to ask for user input about that
-        # but only when when doing interactive training.
+        # register the new bot on the game
+        self.game_client.register_new_player()
         
         self._wait_for_game_state()
         self.observation, self.info, _ = self._return_env_state()

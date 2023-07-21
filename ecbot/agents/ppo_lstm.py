@@ -10,7 +10,7 @@ from ecbot.agents.function_approximators import function_approximators
 from ecbot.agents.base import BaseAgent
 
 
-class PPO(BaseAgent):
+class PPO_LSTM(BaseAgent):
     """Proximal Policy Optimization"""
     
     def __init__(self, *args, **kwargs) -> None:
@@ -18,8 +18,8 @@ class PPO(BaseAgent):
         
         self.steps_done = 0
         
-        assert not self.cfg.actor.approximator.endswith("lstm"), "LSTM in actor not supported for vanilla PPO"
-        assert not self.cfg.critic.approximator.endswith("lstm"), "LSTM in critic not supported for vanilla PPO"
+        assert self.cfg.actor.approximator.endswith("lstm"), "only LSTMs in actor supported for reccurent PPO"
+        assert self.cfg.critic.approximator.endswith("lstm"), "only LSTM in critic supported for recurrent PPO"
         
         self.actor_network = function_approximators[self.cfg.actor.approximator](
             arch_cfg=self.cfg.actor,
@@ -33,17 +33,17 @@ class PPO(BaseAgent):
             output_shape=(1,),
         )
         
-    def _select_action(self, state):
-        action_logits = self.actor_network(state)
+    def _select_action(self, state, hidden_state):
+        action_logits, actor_hidden_state = self.actor_network(state, hidden_state)
         action_dist = Categorical(logits=action_logits)
         action = action_dist.sample()
         action_log_prob = action_dist.log_prob(action)
-        return action.item(), action_log_prob.item()
+        return action.item(), action_log_prob.item(), actor_hidden_state
         
         
-    def act(self, state):
-        action, _ = self._select_action(state)
-        return action
+    def act(self, state, hidden_state):
+        action, _, hidden_state = self._select_action(state, hidden_state)
+        return action, hidden_state
     
     def compute_general_advantage_estimates(self, rewards, values):
         next_values = np.concatenate([values[1:], [0]])
@@ -78,11 +78,16 @@ class PPO(BaseAgent):
             state = self.env.reset()
             ep_rewards = 0.0
             
+            actor_hidden_state = self.actor_network.init_hidden_state(1, self.device)
+            critic_hidden_state = self.critic_network.init_hidden_state(1, self.device)
+            
             states = []
             actions = []
             action_probs = []
             values = []
             rewards = []
+            actor_hidden_states = []
+            critic_hidden_states = []
             
             # collect transitions
             for _ in range(self.cfg.max_train_steps):
@@ -90,10 +95,11 @@ class PPO(BaseAgent):
                 
                 # get the  action and value for that state
                 with torch.no_grad():
-                    action, action_log_prob = self._select_action(obs)
-                    value = self.critic_network(obs).item()
+                    action, action_log_prob, actor_hidden_state = self._select_action(obs, actor_hidden_state)
+                    value, actor_hidden_state = self.critic_network(obs, critic_hidden_state)
+                    value = value.item()
                 
-                next_state, reward, done, truncated, _ = self.env.step(action)
+                next_state, reward, done, truncated, _ = self.env.step(action.item())
                 done = done or truncated
                 
                 # training viz
@@ -106,6 +112,8 @@ class PPO(BaseAgent):
                 values.append(value)
                 rewards.append(reward)
                 action_probs.append(action_log_prob)
+                actor_hidden_states.append(torch.stack(actor_hidden_state, dim=0))
+                critic_hidden_states.append(torch.stack(critic_hidden_state, dim=0))
                 
                 # move to the next state
                 state = next_state
@@ -130,12 +138,16 @@ class PPO(BaseAgent):
             target_values = torch.tensor(np.asarray(target_values)[permute_idxs], dtype=torch.float32, device=self.device)
             advantage_estimates = torch.tensor(np.asarray(advantage_estimates), dtype=torch.float32, device=self.device)
             
+            # for hidden states, the batch size must become the sequence of the LSTM
+            actor_hidden_states = torch.stack(actor_hidden_states, dim=0)[permute_idxs].transpose(0, 3).squeeze(0)
+            critic_hidden_states = torch.stack(critic_hidden_states, dim=0)[permute_idxs].transpose(0, 3).squeeze(0)
+            
             # optimize actor
             actor_loss = []
             entropy_loss = []
             for _ in range(self.cfg.max_actor_train_iterations):
                 
-                new_actions_logits = self.actor_network(states)
+                new_actions_logits = self.actor_network(states, actor_hidden_states)[0]
                 action_dist = Categorical(logits=new_actions_logits)
                 new_actions_log_prob = action_dist.log_prob(actions)
 
@@ -167,7 +179,7 @@ class PPO(BaseAgent):
             critic_loss = []
             for _ in range(self.cfg.critic_train_iterations):
                 
-                pred_values = self.critic_network(states)
+                pred_values = self.critic_network(states, critic_hidden_states)[0]
                 loss = ((target_values - pred_values) ** 2).mean()
                 critic_loss.append(loss.item())
                 

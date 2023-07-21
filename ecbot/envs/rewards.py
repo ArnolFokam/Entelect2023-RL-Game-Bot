@@ -20,6 +20,7 @@ class GetNewCoinsOnPlatform:
         reward = self.cfg.step_penalty
         
         was_on_bad_floor = False
+        terminate_event_occured = False
         
         # -/+ ve reward for collection or lost
         coin_difference = info["collected"] - self.last_collected
@@ -50,12 +51,45 @@ class GetNewCoinsOnPlatform:
         # decay the reward
         self.position_reward[position] = reward * self.cfg.position_reward_decay_factor
         
-        return reward, was_on_bad_floor
+        if self.cfg.terminate_on_bad_floor:
+            terminate_event_occured = terminate_event_occured or was_on_bad_floor
+        
+        return reward, terminate_event_occured
         
     
     def reset(self, info):
         self.last_collected = info["collected"]
         self.position_reward = defaultdict(lambda : self.cfg.initial_position_reward)
+        
+
+class GetNewCoinsOnPlatformV2(GetNewCoinsOnPlatform):
+    def __init__(self, cfg) -> None:
+        super().__init__(cfg)
+        
+        self.last_state = None
+        
+    def __call__(self, info) -> Any:
+        reward, terminate_event_occured = super().__call__(info)
+        
+        hazard_touched = False
+        if self.last_state is not None:
+            hazard_touched = info["hazards_hits"] > self.last_state["hazards_hits"]
+            
+        self.last_state = info
+        
+        # give penalty for touching hazard
+        if hazard_touched:
+            reward += self.cfg.hazard_touched_penalty
+        
+        # check if hazard was touched
+        if self.cfg.terminate_on_hazard_touched:
+            terminate_event_occured = terminate_event_occured or hazard_touched
+            
+        return reward, terminate_event_occured
+    
+    def reset(self, info):
+        super().reset(info)
+        self.last_state = None
 
 
 class NewPosition:
@@ -72,12 +106,27 @@ class NewPosition:
         # decay the reward
         self.position_reward[position] = reward * self.cfg.position_reward_decay_factor
         
-        return reward
+        return reward, False
     
     def reset(self, *args, **kwargs):
         self.position_reward = defaultdict(lambda : self.cfg.initial_position_reward)
 
 reward_fn = {
+    # reward for new position
     "new_position": NewPosition,
-    "coins_on_platform": GetNewCoinsOnPlatform
+    
+    # reward for new coins
+    # penalize on lost coins
+    # step penalty
+    # reward on good floor
+    # penalize on bad floor
+    "coins_on_platform": GetNewCoinsOnPlatform,
+    
+    # reward for new coins 
+    # penalize on lost coins
+    # penalize on hazards touched
+    # step penalty 
+    # reward on good floor 
+    # penalize on bad floor
+    "coins_on_platform_v2": GetNewCoinsOnPlatformV2
 }
