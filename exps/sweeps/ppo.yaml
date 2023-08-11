@@ -1,20 +1,19 @@
 project:
   - ECBOT
 
-actor.filters:
-  - [32]
-  - [32, 32]
-  - [32, 64]
-  - [32, 32, 64]
+env_name: 
+  - spsa_stacked_v4
+  - spsa_stacked_v5
 
-critic.filters:
-  - [32]
-  - [32, 32]
+terminate_on_hazard_touched:
+  - true
+  - false
 
-entropy_coefficient:
-  - 0.01
-  - 0.001
-
+hazard_touched_penalty:
+  - -0.5
+  - -10.0
+  - -50.0
+  - -100.0
 
 game_server_port:
   - 5000

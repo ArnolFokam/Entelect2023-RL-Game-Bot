@@ -177,7 +177,7 @@ class SinglePlayerSingleAgentStackedFramesEnvV5(SinglePlayerSingleAgentStackedFr
             # command from the  game server are 1-indexed
             self.game_client.send_player_command(int(action + 1))
         else:
-            time.spleep(Constants.WAITING_TIME + 0.1)
+            time.sleep(Constants.WAITING_TIME + 0.1)
     
         self._wait_for_game_state()
         
