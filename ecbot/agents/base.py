@@ -16,7 +16,8 @@ class BaseAgent:
         self.observation_shape = self.env.observation_space.shape
         
         # other agent things
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cpu")
         
         
     def learn(self):
