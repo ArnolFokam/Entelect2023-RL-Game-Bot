@@ -15,7 +15,7 @@
 
 <div align="center">
   <h3>
-    <a href="https://challenge.entelect.co.za/home">Enlect Challenge</a> |
+    <a href="https://challenge.entelect.co.za/home">Entelect Challenge</a> |
     <a href="#overview">Overview</a> |
     <a href="#quickstart">Quickstart</a> |
     <a href="#usage">Usage</a> |
@@ -24,26 +24,24 @@
   </h3>
 </div>
 
-<h2 name="overview" id="overview">Overview </h2>
+<h2 name="overview" id="overview">Overview</h2>
 
 This project showcases a bot trained using reinforcement learning algorithms such as DQN and PPO, developed from scratch to play a platformer game. The game is hosted on a server implemented by Entelect, which can be accessed at this [link](https://github.com/EntelectChallenge/2023-Cy-Fi). However, an OpenAI Gym wrapper environment is utilized to communicate with the server for training the bot.
 
-<h2 name="quickstart" id="quickstart">Quickstart </h2>
+<h2 name="quickstart" id="quickstart">Quickstart</h2>
 
 ### System Requirements
 
 * Docker
-* .NET = `6.0`
-* Python >= `3.8`
+* .NET `6.0`
+* Python `>= 3.8`
 
 The following steps assume the repository is already cloned and you are on a terminal with a working Python environment.
 
 ### Install Project Requirements
 
-Here's the corrected version:
-
 * Install `dotnet` by following these [instructions](https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual#scripted-install).
-* Make sure the `dotnet` command can be called from the terminal (see [here](https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual#example) for help).
+* Ensure the `dotnet` command can be called from the terminal (see [here](https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual#example) for help).
 * Install PyTorch by following the steps outlined [here](https://pytorch.org/get-started/locally/).
 * Install project requirements from the specified file.
 
@@ -61,7 +59,7 @@ pip install -r requirements.txt
 cd game/2023-CyFi
 dotnet restore
 dotnet publish --configuration Release --output ./publish
-cd publish && dotnet CyFi.dll <PORT_YOU_WANT_TO_USE_SERVER_ON>
+cd publish && dotnet CyFi.dll <GAME_SERVER_PORT>
 ```
 
 * The console will print something similar to what you see below:
@@ -92,7 +90,7 @@ Start position {X=143,Y=48}
 * While the server is running, train the agent with the following command
 
 ```bash
-python train.py --config-path=exps --config-name=ppo $(python new_hydra_dir_params.py) game_server_port=<PORT_YOU_WANT_TO_USE_SERVER_ON>
+python train.py --config-path=exps --config-name=ppo $(python new_hydra_dir_params.py) game_server_port=<GAME_SERVER_PORT>
 ```
 
 * The output of the training command will be similar to what you see below
@@ -101,7 +99,7 @@ python train.py --config-path=exps --config-name=ppo $(python new_hydra_dir_para
 Starting connection...
 Connection started
 socket server is not initialized.
-Starting 1th episode
+Starting 1st episode
 Registering bot
 Bot registered with ID:  74e8ac32-004b-11ef-9364-f77699ea19da
 reward: -0.5, mean: -0.5
@@ -117,11 +115,38 @@ reward: 7.5, mean: 0.3888888888888889
 
 ### Visualize an agent training
 
-* The following steps assumes that the server is running on the port 5000
-* First run the visualization server with the following command
+* First, start the visualization server before starting the training with the command
 
 ```bash
 python start_viz_server.py game_server_port=<VIZ_SERVER_PORT>
+```
+
+* Then, run the command needed to train the agent, but this time, with a parameter for the socket client in the gym environment to listen to the visualization server
+
+```bash
+python train.py --config-path=exps --config-name=ppo $(python new_hydra_dir_params.py) game_server_port=<GAME_SERVER_PORT> viz_server_port=<VIZ_SERVER_PORT>
+```
+
+* Make sure you capture the `RUN_ID` when the training is starting. It looks similar to this string `LODXU7UR0O`
+
+* When both the game server is running and the agent is training, you can start the visualization client using the following command
+
+```bash
+python start_viz_client.py <VIZ_SERVER_PORT> <RUN_ID>
+```
+
+This gameplay looks similar to this video
+
+<div align="
+
+center">
+<img  src="viz_gameplay.gif"/>
+</div>
+
+**PROBLEM 🚨🚨** if pygame crashes on some iris, swarst issues run the following command before re-running the client visualizer **🚨🚨**
+
+```bash
+conda install -c conda-forge libstdcxx-ng
 ```
 
 <h2 name="contributing" id="contributing">Contributing 🤝</h2>
@@ -130,40 +155,6 @@ I do not accept contributions for now, but feel free to raise any issues you spo
 
 <h2 name="author" id="author">Author's Info 👨‍🎨</h2>
 
-* Website: https://arnolfokam.github.io/
+* Website: [https://arnolfokam.github.io/](https://arnolfokam.github.io/)
 * Twitter: [@ArnolFokam](https://twitter.com/ArnolFokam)
-* LinkedIn: [@arnolfokam](https://linkedin.com/in/arnolfokam)
-
-**Note:** Do all your dev work on the train branch.
-
-# Requires
-- Python 3.8.16
-- Docker
-- Conda (Anaconda or Miniconda)
-
-# How to run
-
-## Environment
-
-```bash
-cd game/2023-CyFi
-dotnet restore
-dotnet publish --configuration Release --output ./publish
-cd publish && dotnet CyFi.dll [port you want the server to run on]
-```
-
-## Agent
-- Create python environment with `conda create -n ecbot python=3.8.16`
-- Activate the environment with `conda activate ecbot`
-- Install python things with `pip install -r requirements.txt`
-- While env is running (on another window), run the following command:
-
-```bash
-python train.py --config-path=exps --config-name=ppo $(python new_hydra_dir_params.py) game_server_port=[port on which the server is running]
-```
-
-Note: if pygame crashes on some iris, swarst issues run the following command:
-
-```bash
-conda install -c conda-forge libstdcxx-ng
-``` 
+* LinkedIn: [arnolfokam](https://linkedin.com/in/arnolfokam)
