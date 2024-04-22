@@ -137,10 +137,8 @@ python start_viz_client.py <VIZ_SERVER_PORT> <RUN_ID>
 
 This gameplay looks similar to this video
 
-<div align="
-
-center">
-<img  src="viz_gameplay.gif"/>
+<div align="center">
+    <img  src="viz_gameplay.gif"/>
 </div>
 
 **PROBLEM 🚨🚨** if pygame crashes on some iris, swarst issues run the following command before re-running the client visualizer **🚨🚨**
