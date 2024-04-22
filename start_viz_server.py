@@ -12,4 +12,4 @@ async def new_frame(_, data):
     await sio.emit('on_new_frame', data=data)
     
 if __name__ == '__main__':
-    web.run_app(app, port=sys.argv[1])
+    web.run_app(app, port=int(sys.argv[1]))
